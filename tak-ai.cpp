@@ -55,36 +55,25 @@ bool isRoad(vector<int> node[5][5], bool isWhite) {
 
 int evaluation(vector<int> node[5][5], bool isWhite) {
 	int val = 0;
-	if(node.white_out_flat==0 || node.black_out_flat==0 || isRoad(node, isWhite) || isRoad(node, !isWhite)) {	// wins
-		if(isWhite) {
-			if(node.white_out_flat > node.black_out_flat)	// flat win
-				val += node.white_out_flat;
-			else if(isRoad(node, isWhite))											// road win
-				val += node.white_out_flat + 25;
-			else
-				val += node.white_in_flat;
-		}
-		else {
-			if(node.white_out_flat < node.black_out_flat)	// flat win
-				val += node.black_out_flat;
-			if(isRoad(node, isWhite))											// road win
-				val += node.black_out_flat + 25;
-			else
-				val += node.white_in_flat;
-		}
-		return val;
+	//if(node.white_out_flat==0 || node.black_out_flat==0 || isRoad(node, isWhite) || isRoad(node, !isWhite)) {	// wins
+	if(isWhite) {
+		if(node.white_out_flat > node.black_out_flat)	// flat win
+			val += node.white_out_flat;
+		else if(isRoad(node, isWhite))											// road win
+			val += node.white_out_flat + 25;
+		else
+			val += node.white_in_flat;
 	}
-
-	if() {	// road win
-		if(isRoad(node, isWhite) && isWhite)
-			val += 25;
-		if(isRoad(node, !isWhite) && !isWhite)
-			val += 25;
+	else {
+		if(node.white_out_flat < node.black_out_flat)	// flat win
+			val += node.black_out_flat;
+		if(isRoad(node, isWhite))											// road win
+			val += node.black_out_flat + 25;
+		else
+			val += node.white_in_flat;
 	}
-
-	int val = node.out_flat;	//	unplayed flatstones
-	if(isRoad(node, isWhite))
-		val += 25;	// size of the board
+	//}
+	return val;
 }
 
 vector<string> getChildren(vector<int> node[5][5]) {
