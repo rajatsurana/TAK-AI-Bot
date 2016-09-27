@@ -14,26 +14,25 @@ void isRoadUtil(int A[5][5], int x, int y, int n) {
 }
 
 bool isRoad(vector<int> node[5][5], bool isWhite) {
-	int A[5][5];
-	for(int i = 0 ; i < 5 ; i++) {
-		for(int j = 0 ; j < 5 ; j++) {
-			if(node[i][j].pop_back()%10==1 && isWhite)
-				A[i][j] = 1;
-			else if(node[i][j].pop_back()%10==2 && !isWhite)
-				A[i][j] = 1;
-			else
-				A[i][j] = 0;
-		}
-	}
-
 	int N = 5;
 	int stor_x[5][5], stor_y[5][5];
 	for(int i = 0 ; i < N ; i++) {
 		for(int j = 0 ; j < N ; j++) {
-			stor_x[i][j] = A[i][j];
-			stor_y[i][j] = A[i][j];
+			if(node[i][j].back()%10==1 && isWhite) {
+				stor_x[i][j] = 1;
+				stor_y[i][j] = 1;
+			}
+			else if(node[i][j].back()%10==2 && !isWhite) {
+				stor_x[i][j] = 1;
+				stor_y[i][j] = 1;
+			}
+			else {
+				stor_x[i][j] = 0;
+				stor_y[i][j] = 0;
+			}
 		}
 	}
+
 	for(int i = 0 ; i < N ; i++) {
 		if(stor_x[0][i] > 0)
 			isRoadUtil(stor_x, 0, i, N);
@@ -54,8 +53,38 @@ bool isRoad(vector<int> node[5][5], bool isWhite) {
 	return false;
 }
 
-int evaluation(vector<int> node[5][5]) {
+int evaluation(vector<int> node[5][5], bool isWhite) {
+	int val = 0;
+	if(node.white_out_flat==0 || node.black_out_flat==0 || isRoad(node, isWhite) || isRoad(node, !isWhite)) {	// wins
+		if(isWhite) {
+			if(node.white_out_flat > node.black_out_flat)	// flat win
+				val += node.white_out_flat;
+			else if(isRoad(node, isWhite))											// road win
+				val += node.white_out_flat + 25;
+			else
+				val += node.white_in_flat;
+		}
+		else {
+			if(node.white_out_flat < node.black_out_flat)	// flat win
+				val += node.black_out_flat;
+			if(isRoad(node, isWhite))											// road win
+				val += node.black_out_flat + 25;
+			else
+				val += node.white_in_flat;
+		}
+		return val;
+	}
 
+	if() {	// road win
+		if(isRoad(node, isWhite) && isWhite)
+			val += 25;
+		if(isRoad(node, !isWhite) && !isWhite)
+			val += 25;
+	}
+
+	int val = node.out_flat;	//	unplayed flatstones
+	if(isRoad(node, isWhite))
+		val += 25;	// size of the board
 }
 
 vector<string> getChildren(vector<int> node[5][5]) {
