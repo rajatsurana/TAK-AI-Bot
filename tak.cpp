@@ -6,8 +6,13 @@ using namespace std;
 class Matrix{
 	public:
 		vector<int> arrArrVect[size][size];
-		validMove(int type,int i, int j,int dirn);
-		insert(int i,int j,int type);
+		void validMove(int type,int i, int j,int dirn);
+		void insert(int i,int j,int type);
+		int blackFlatStoneLeft=21;
+		int whiteFlatStoneLeft=21;
+		int blackCapStoneLeft=1;
+		int whiteCapStoneLeft=1;
+		//enums
 		// 11 white flat stone
 		// 12 black flat stone
 		// 21 white standing stone
@@ -22,6 +27,26 @@ void Matrix::validMove(int type,int i, int j,int dirn){//type=(in/out)
 	int direction=dirn;
 }
 void Matrix::insert(int i,int j,int type){
+	switch type:
+	case 11:
+		//decrement the type of stone;
+		whiteFlatStoneLeft-=1;
+		break;
+	case 12:
+		blackFlatStoneLeft-=1;
+		break;
+	case 21:
+		whiteFlatStoneLeft-=1;
+		break;
+	case 22:
+		blackFlatStoneLeft--;
+		break;
+	case 31:
+		whiteCapStoneLeft-=1;
+		break;
+	case 32:
+		blackCapStoneLeft-=1;
+		break;
 	arrArrVect[i][j].push_back(type);
 }
 int main(){
