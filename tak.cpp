@@ -48,6 +48,10 @@ void Matrix::insert(int i,int j,int type){
 		blackCapStoneLeft-=1;
 		break;
 	arrArrVect[i][j].push_back(type);
+	//send signal of insertion to opponent
+	//Fa1 -> Flat at a1
+	//Sd3 -> standing at d3
+	//Cb4 -> cap at b4
 }
 int main(){
     Matrix matrix;

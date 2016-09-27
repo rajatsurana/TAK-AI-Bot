@@ -214,7 +214,7 @@ string[] decodeMyMove5(string move){
     string str[5];
     //0->size//1->positionX//2->positionY//3->direction//4->no. of stones dropped in sequence
     char firstLetter=move.at(0);
-    int size = (int)firstLetter;
+    //int size = (int)firstLetter;
     str[0] = myCharToString(firstLetter);
     str[1]=myCharToString(move.at(1));
     str[2]=myCharToString(move.at(2));
@@ -228,10 +228,10 @@ string[] decodeMyMove5(string move){
 }
 string[] decodeMyMove4(string move){
     string str[4];
-    //0->size//1->positionX//2->positionY//3->direction//4->no. of stones dropped in sequence
+    //0->size//1->position//2->direction//3->no. of stones dropped in sequence
     char firstLetter=move.at(0);
-    int size = (int)firstLetter;
-    str[0] = myCharToString(firstLetter);
+    //int size = (int)firstLetter;
+    str[0] = myCharToString(firstLetter);//
     str[1]=myCharToString(move.at(1),move.at(2));//In this case size will be 4
     str[2]=myCharToString(move.at(3));
     string drops;
