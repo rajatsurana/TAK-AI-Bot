@@ -62,7 +62,6 @@ vector<string> getChildren(vector<int> node[5][5]) {
 	//IN=	FLATnWall-> (ADJACENT-WALL-CAP)
 	//IN=	CAP->		(ADJACENT-CAP)
 	
-
 	//towards j(=a) >    	---------------------right
 	//away j <				---------------------left
 	//towards i(==) -		---------------------up
@@ -86,26 +85,23 @@ vector<string> getChildren(vector<int> node[5][5]) {
 							if(type!=31 || type !=32 ){//not a cap stone
 								if(nextSize!=0){
 									typeNext =node[i+1][j].at(nextSize-1);
-									if(typeNext== 11 || typeNext == 12){////////
+									if(typeNext== 11 || typeNext == 12){//only move over flat stones
 										allMoves.push_back(res +">1");
 									}							
-								}else{
+								}else{//move on adjacent vacant nodes
 									allMoves.push_back(res +">1");
 								}
 							}else{//if cap stone
 								if(nextSize!=0){
 									typeNext =node[i+1][j].at(nextSize-1);
-									if(typeNext!= 31 || typeNext != 32){////////
+									if(typeNext!= 31 || typeNext != 32){//not move over cap stones
 										allMoves.push_back(res +">1");
 									}							
 								}else{
 									allMoves.push_back(res +">1");
 								}
 							}
-							
-							
 							//right-> increment in i so check whether there is a wall or not on top of next
-													
 							//down
 							allMoves.push_back(res+"+1");
 						}
