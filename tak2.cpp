@@ -61,7 +61,7 @@ vector<string> getChildren(vector<int> node[5][5]) {
 //return all different valid moves in string
 	//IN=	FLATnWall-> (ADJACENT-WALL-CAP)
 	//IN=	CAP->		(ADJACENT-CAP)
-	//OUT=  AllLeft->   UNOCCUPIED ONLY
+	
 
 	//towards j(=a) >    	---------------------right
 	//away j <				---------------------left
@@ -72,44 +72,72 @@ vector<string> getChildren(vector<int> node[5][5]) {
 	for(int i = 0 ; i < 5 ; i++) {
 		for(int j = 0 ; j < 5 ; j++) {
 			int size=node[i][j].size();
-			if(i==0){
-				if(j==0){
-					//right down
-					//whether a wall or cap stone is in path or not--have to consider*****************************
-					//also hav to insert and update the matrix---here or while using getChildren
-					if(size==1){
-						//right
-						string res=to_string(size)+encodeJ(j)+encode(i);
-						allMoves.push_back(res +">1");
-						//down
-						allMoves.push_back(res+"+1");
+			if(size!=0){
+				if(i==0){
+					if(j==0){
+						//right down
+						//whether a wall or cap stone is in path or not--have to consider*****************************
+						//also hav to insert and update the matrix---here or while using getChildren
+						if(size==1){
+							int pick =1;
+							type=node[i][j].at(size-1);
+							string res=to_string(pick)+encodeJ(j)+encodeI(i);
+							nextSize=node[i+1][j].size();
+							if(type!=31 || type !=32 ){//not a cap stone
+								if(nextSize!=0){
+									typeNext =node[i+1][j].at(nextSize-1);
+									if(typeNext== 11 || typeNext == 12){////////
+										allMoves.push_back(res +">1");
+									}							
+								}else{
+									allMoves.push_back(res +">1");
+								}
+							}else{//if cap stone
+								if(nextSize!=0){
+									typeNext =node[i+1][j].at(nextSize-1);
+									if(typeNext!= 31 || typeNext != 32){////////
+										allMoves.push_back(res +">1");
+									}							
+								}else{
+									allMoves.push_back(res +">1");
+								}
+							}
+							
+							
+							//right-> increment in i so check whether there is a wall or not on top of next
+													
+							//down
+							allMoves.push_back(res+"+1");
+						}
+					}else if(j==4){
+						//right up
+					}else{
+						//up down right
 					}
-				}else if(j==4){
-					//right up
+				}else if(i==4){
+					if(j==0){
+						//left down
+					}else if(j==4){
+						//left up
+					}else{
+						//up down left
+					}
 				}else{
-					//up down right
-				}
-			}else if(i==4){
-				if(j==0){
-					//left down
-				}else if(j==4){
-					//left up
-				}else{
-					//up down left
-				}
-			}else{
-				if(j==0){
-					//down right left
-				}else if(j==4){
-					//up right left
-				}else{
-					// mid of matrix
-					//all four directions
+					if(j==0){
+						//down right left
+					}else if(j==4){
+						//up right left
+					}else{
+						//mid of matrix
+						//all four directions
+					}
 				}
 			}
 		}
 	}
 	//in--------------------
+
+	//OUT=  AllLeft->   UNOCCUPIED ONLY
 }
 
 int alphabeta(vector<int> node[5][5], int depth, int alpha, int beta, bool maximizingPlayer) {
