@@ -6,11 +6,11 @@ int whiteFlatStoneLeft=21;
 int blackCapStoneLeft=1;
 int whiteCapStoneLeft=1;
 //enums
-char[] strChar(string);
+char* strChar(string);
 string encodeI(int);
 string encodeJ(int);
-string[] decodeMyMove5(string);
-string[] decodeMyMove4(string);
+string* decodeMyMove5(string);
+string* decodeMyMove4(string);
 string myCharToString(char,char);
 string myCharToString(char);
 int decodeJ(string);
@@ -202,24 +202,12 @@ int decodeI(string X){
     return i-1;
 }
 int decodeJ(string Y){
-        int res=0;
-        //int d=j+1;
-    switch (Y){
-    case "a":
-        res=0;
-        break;
-    case "b":
-        res=1;
-        break;
-    case "c":
-        res=2;
-        break;
-    case "d":
-        res=3;
-        break;
-    case "e":
-        res=4;
-        break;}
+    int res=0;
+    if (Y=="a") res=0;
+    else if(Y=="b") res=1;
+    else if(Y=="c") res=2;
+    else if(Y=="d") res=3;
+    else if(Y=="e") res=4;
     return res;
 }
 string myCharToString(char c){
@@ -234,33 +222,34 @@ string myCharToString(char c1,char c2){
     str.push_back(c2);
     return str;
 }
-string[] decodeMyMove5(string move){
-    string str[5];
+string* decodeMyMove5(string move){
+    string* str= new string[5];
     //0->size//1->positionX//2->positionY//3->direction//4->no. of stones dropped in sequence
     char firstLetter=move.at(0);
-    //int size = (int)firstLetter;
+    int size = (int)firstLetter;
     str[0] = myCharToString(firstLetter);
-    str[1]=myCharToString(move.at(1));
-    str[2]=myCharToString(move.at(2));
-    str[3]=myCharToString(move.at(3));
+    str[1]= myCharToString(move.at(1));
+    str[2]= myCharToString(move.at(2));
+    //str[1]=myCharToString(move.at(1),move.at(2));//In this case size will be 4
+    str[3]= myCharToString(move.at(3));
     string drops;
     for(int i=4;i<move.size();i++){
-        drops.push_back(myCharToString(move.at(i)));
+        drops=drops+myCharToString(move.at(i));
     }
     str[4]=drops;
     return str;
 }
-string[] decodeMyMove4(string move){
-    string str[4];
-    //0->size//1->position//2->direction//3->no. of stones dropped in sequence
+string* decodeMyMove4(string move){
+    string* str= new string[4];
+    //0->size//1->position//2->direction//2->no. of stones dropped in sequence
     char firstLetter=move.at(0);
-    //int size = (int)firstLetter;
-    str[0] = myCharToString(firstLetter);//
-    str[1]=myCharToString(move.at(1),move.at(2));//In this case size will be 4
-    str[2]=myCharToString(move.at(3));
+    int size = (int)firstLetter;
+    str[0] = myCharToString(firstLetter);
+    str[1]= myCharToString(move.at(1),move.at(2));
+    str[2]= myCharToString(move.at(3));
     string drops;
     for(int i=4;i<move.size();i++){
-        drops.push_back(myCharToString(move.at(i)));
+        drops=drops+myCharToString(move.at(i));
     }
     str[3]=drops;
     return str;
@@ -289,9 +278,9 @@ string encodeJ(int j){
 string encodeI(int i){
     return to_string(i+1);
 }
-char[] strChar(string tmp){
-    char tab2[1024];
+char* strChar(string tmp){
+    char* tab2= new char[1024];
     strncpy(tab2, tmp.c_str(), sizeof(tab2));
     tab2[sizeof(tab2) - 1] = 0;
     return tab2;
-}
+}}
