@@ -198,7 +198,7 @@ main(){}
     cout << g.size() << std::endl;
 */
 int decodeI(string X){
-    int i = (int) X.at(0);//size of X should be 1;
+    int i = atoi(X.c_str());//size of X should be 1;
     return i-1;
 }
 int decodeJ(string Y){
