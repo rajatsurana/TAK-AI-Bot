@@ -23,8 +23,10 @@ void place(int stones, int index, vector<int> A, vector< vector<int>>& res) {
 }
 
 void place_wrapper(int stones, int index, vector<int> A, vector< vector<int>>& res, int width) {
-	if(A.size()==1)
+	if(A.size()==1) {
 		res.push_back(A);
+		return;
+	}
 	for(int k = 0 ; k <= min(width, stones) ; k++) {
 		vector<int> tmp;
 		for(int l = 0 ; l < A.size() ; l++)

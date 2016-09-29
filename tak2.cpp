@@ -57,11 +57,38 @@ string encodeJ(int j){
 string encodeI(int i){
     return to_string(i+1);
 }
+
+/*
+This implementation seems a little overkill, if you want you can consider this pseudocode :
+
+valid_moves():
+	if (isWin())
+		return;
+	if (any unplayed_flatstone) || (unplayed_cap_stone) {
+		place on any of the empty tiles;
+	}
+	if(capstone_played) {
+		if (i+1 < n) && tile[i+1][j]!=capstone
+			place_capstone(i+1, j);
+		if (j+1 < n) && tile[i][j+1]!=capstone
+			place_capstone(i, j+1);
+		if (i-1 > 0) && tile[i-1][j]!=capstone
+			place_capstone(i-1, j);
+		if (j-1 > 0) && tile[i][j-1]!=capstone
+			place_capstone(i, j-1);
+	}
+	for tile in occupied_tiles {
+		for direction in {up, down, left, right} {			// also check for in bounds. ie., i+1 < n and all
+			vacant_tiles = get_vacant_tiles(tile, direction);
+			place_wrapper()
+		}
+	}
+*/
 vector<string> getChildren(vector<int> node[5][5]) {
 //return all different valid moves in string
 	//IN=	FLATnWall-> (ADJACENT-WALL-CAP)
 	//IN=	CAP->		(ADJACENT-CAP)
-	
+
 	//towards j(=a) >    	---------------------right
 	//away j <				---------------------left
 	//towards i(==) -		---------------------up
@@ -87,7 +114,7 @@ vector<string> getChildren(vector<int> node[5][5]) {
 									typeNext =node[i+1][j].at(nextSize-1);
 									if(typeNext== 11 || typeNext == 12){//only move over flat stones
 										allMoves.push_back(res +">1");
-									}							
+									}
 								}else{//move on adjacent vacant nodes
 									allMoves.push_back(res +">1");
 								}
@@ -96,7 +123,7 @@ vector<string> getChildren(vector<int> node[5][5]) {
 									typeNext =node[i+1][j].at(nextSize-1);
 									if(typeNext!= 31 || typeNext != 32){//not move over cap stones
 										allMoves.push_back(res +">1");
-									}							
+									}
 								}else{
 									allMoves.push_back(res +">1");
 								}
@@ -175,7 +202,7 @@ int main() {
 /*
 char decodeMove(string move){
 	for(int i=0; i<move.size();i++){
-	
+
 	}
     char size=move.at(0);
     return size;
@@ -187,10 +214,10 @@ main(){}
     vector<string> v;
     g= g+ "a1>"+encodeJ(2)+encodeI(1);
     v.push_back(g);
-    
+
     cout<<v.at(0)<<endl;
     cout<<decodeMove(g)<<endl;
-    string s(1, decodeMove(g)); 
+    string s(1, decodeMove(g));
     std::cout << s << std::endl;
     string h;
     h.push_back(decodeMove(g));

@@ -1,0 +1,3 @@
+- Handle Horizon effect ; explore little further if looks good ;
+- Improve evaluation function :- train or look up from taktician's ;
+- Generalize for board of size N ;
