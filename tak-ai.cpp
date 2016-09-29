@@ -1,6 +1,13 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+class Board {
+public:
+	bool isWhite;
+	int flat_in, flat_out;
+	int oflat_in, oflat_out;	// opponent's
+};
+
 void isRoadUtil(int A[5][5], int x, int y, int n) {
 	A[x][y] = -1;
 	if(x-1>=0 && A[x-1][y]==1)
@@ -77,6 +84,10 @@ int evaluation(vector<int> node[5][5], bool isWhite) {
 }
 
 vector<string> getChildren(vector<int> node[5][5]) {
+
+}
+
+void playMove(vector<int> node[5][5], string move) {
 
 }
 
