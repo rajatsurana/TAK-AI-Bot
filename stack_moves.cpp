@@ -41,19 +41,67 @@ void place_wrapper(int stones, int index, vector<int> A, vector< vector<int>>& r
 	}
 	return;
 }
-
+int countCells(int direction,int i,int j,int width){
+    int numCells=0;
+    switch (direction){
+        case 0://right
+            numCells=width -(i+1);
+            break;
+        case 1://left
+            numCells=i;
+            break;
+        case 2://up
+            numCells=j;
+            break;
+        case 3://down
+            numCells=width -(j+1);
+            break;
+            
+    }
+}
+void filterMoves(vector<int> &possibleMoves,vector<vector<int>> res,int numCells){
+    //#nonZeroElements= atMax(numCells);
+    for(int i = 0 ; i < res.size() ; i++) {
+        int counterNonZero = 0;
+		for(int j = 0 ; j < res[i].size() ; j++) {
+			if(res[i][j]!=0){
+			    counterNonZero = counterNonZero+1;
+			}
+		}
+		if(counterNonZero<=numCells){
+		    possibleMoves.push_back(i);
+		    //or possibleMoves.push_back(res[i]);if possibleMoves is vector<vector<int>>
+		}
+	}
+}
 int main() {
-   
+    
 	vector<vector<int>> res;
 	vector<int> A(4, 0);//stone drop sequence
 	int stones = 9, index = 0, width = 5;
 	//place(stones, index, A, res);
 	A[0] = stones;
 	place_wrapper(stones, index, A, res, width);
-
-	for(int i = 0 ; i < res.size() ; i++) {
-		for(int j = 0 ; j < res[i].size() ; j++) {
-			cout<<res[i][j]<<" ";
+	//now i have
+	//incorporate i and j---i.e. position
+    //incorporate direction
+    //consider the number of blanks
+    //#blanks:
+    //  toLeft= i;
+    //  toRight = width-(i+1)
+    //  toUp= j;
+    //  toDown = width- (j+1)
+    //#(non zero elements in res = atMax(#(blanks))
+    int direction=0, i=2, j=2;
+    int numCells=countCells(direction,i,j,width);
+    //cout<<numCells<<endl;
+    vector<int> possibleMoves;
+    filterMoves(possibleMoves,res, numCells);
+    //cout<<possibleMoves.size()<<" size"<<endl;
+    for(int i = 0 ; i < possibleMoves.size() ; i++) {
+        int k=possibleMoves[i];
+		for(int j = 0 ; j < res[k].size() ; j++) {
+			cout<<res[k][j]<<" ";
 		}
 		cout<<endl;
 	}
