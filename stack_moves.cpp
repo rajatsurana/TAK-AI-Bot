@@ -27,15 +27,15 @@ void place_wrapper(int stones, int index, vector<int> A, vector< vector<int>>& r
 		res.push_back(A);
 		return;
 	}
-    int len=min(width, stones);
-	for(int k = 1 ; k <= len ; k++) {
+    int stackSize=min(width, stones);
+	for(int k = 1 ; k <= stackSize ; k++) {//zero stones cant be placed so k=1
 		vector<int> tmp;
 		for(int l = 0 ; l < A.size() ; l++){
-		    cout<<A[l]<<endl;
-			tmp.push_back(A[l]);}
+			tmp.push_back(A[l]);
+		}
 		A[index] = k;
 
-		place(len-k, index+1, A, res);
+		place(stackSize-k, index+1, A, res);//k stones placed
 
 		A = tmp;
 	}
@@ -45,7 +45,7 @@ void place_wrapper(int stones, int index, vector<int> A, vector< vector<int>>& r
 int main() {
    
 	vector<vector<int>> res;
-	vector<int> A(4, 0);
+	vector<int> A(4, 0);//stone drop sequence
 	int stones = 9, index = 0, width = 5;
 	//place(stones, index, A, res);
 	A[0] = stones;
