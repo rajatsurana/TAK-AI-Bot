@@ -27,13 +27,15 @@ void place_wrapper(int stones, int index, vector<int> A, vector< vector<int>>& r
 		res.push_back(A);
 		return;
 	}
-	for(int k = 0 ; k <= min(width, stones) ; k++) {
+    int len=min(width, stones);
+	for(int k = 1 ; k <= len ; k++) {
 		vector<int> tmp;
-		for(int l = 0 ; l < A.size() ; l++)
-			tmp.push_back(A[l]);
+		for(int l = 0 ; l < A.size() ; l++){
+		    cout<<A[l]<<endl;
+			tmp.push_back(A[l]);}
 		A[index] = k;
 
-		place(stones-k, index+1, A, res);
+		place(len-k, index+1, A, res);
 
 		A = tmp;
 	}
@@ -41,11 +43,11 @@ void place_wrapper(int stones, int index, vector<int> A, vector< vector<int>>& r
 }
 
 int main() {
-	vector< vector<int>> res;
+   
+	vector<vector<int>> res;
 	vector<int> A(4, 0);
-	int stones = 5, index = 0, width = 5;
+	int stones = 9, index = 0, width = 5;
 	//place(stones, index, A, res);
-
 	A[0] = stones;
 	place_wrapper(stones, index, A, res, width);
 

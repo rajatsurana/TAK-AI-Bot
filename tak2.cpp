@@ -88,11 +88,19 @@ vector<string> getChildren(vector<int> node[5][5]) {
 //return all different valid moves in string
 	//IN=	FLATnWall-> (ADJACENT-WALL-CAP)
 	//IN=	CAP->		(ADJACENT-CAP)
-
+	
 	//towards j(=a) >    	---------------------right
 	//away j <				---------------------left
 	//towards i(==) -		---------------------up
 	//away i +				---------------------down
+
+	//size=1 ->>>>> 1
+	//size=2 ->>>>> 11,2
+	//size=3 ->>>>> 111,12,21,3
+	//size=4 ->>>>> 1111,112,121,211,22,13,31,4
+	//size>=5->>>>> 1112,1121,1211,2111,113,131,311,23,32,14,41,5--------------these are possible moves but depend on actual position
+	//like if in middle(i=2,j=2) then can only drop two times...so 23,32,14,41,5 are the possible moves in either direction for size>=5
+	
 	vector<string> allMoves;
 	//in--------------------
 	for(int i = 0 ; i < 5 ; i++) {
@@ -109,28 +117,45 @@ vector<string> getChildren(vector<int> node[5][5]) {
 							type=node[i][j].at(size-1);
 							string res=to_string(pick)+encodeJ(j)+encodeI(i);
 							nextSize=node[i+1][j].size();
-							if(type!=31 || type !=32 ){//not a cap stone
+							nextSizeDown=node[i][j+1].size();
+							if(!isCapStone(type)){//not a cap stone
 								if(nextSize!=0){
+									//right-> increment in i so check whether there is a wall or not on top of next
 									typeNext =node[i+1][j].at(nextSize-1);
-									if(typeNext== 11 || typeNext == 12){//only move over flat stones
+									if(isFlatStone(typeNext)){//only move over flat stones
 										allMoves.push_back(res +">1");
-									}
+									}							
 								}else{//move on adjacent vacant nodes
 									allMoves.push_back(res +">1");
+								}
+								if(nextSizeDown!=0){
+									typeNextDown =node[i][j+1].at(nextSizeDown-1);
+									if(isFlatStone(typeNextDown)){//only move over flat stones
+										allMoves.push_back(res +"+1");
+									}
+								}else{
+									allMoves.push_back(res+"+1");
 								}
 							}else{//if cap stone
 								if(nextSize!=0){
 									typeNext =node[i+1][j].at(nextSize-1);
-									if(typeNext!= 31 || typeNext != 32){//not move over cap stones
+									if(!isCapStone(typeNext)){//not move over cap stones
 										allMoves.push_back(res +">1");
-									}
+									}							
 								}else{
 									allMoves.push_back(res +">1");
 								}
-							}
-							//right-> increment in i so check whether there is a wall or not on top of next
-							//down
-							allMoves.push_back(res+"+1");
+								if(nextSizeDown!=0){
+									typeNextDown =node[i][j+1].at(nextSizeDown-1);
+									if(isFlatStone(typeNextDown)){//only move over flat stones
+										allMoves.push_back(res +"+1");
+									}
+								}else{
+									allMoves.push_back(res+"+1");
+								}
+							}						
+						}else if(size==2){
+
 						}
 					}else if(j==4){
 						//right up
@@ -159,9 +184,9 @@ vector<string> getChildren(vector<int> node[5][5]) {
 		}
 	}
 	//in--------------------
-
 	//OUT=  AllLeft->   UNOCCUPIED ONLY
 }
+
 
 int alphabeta(vector<int> node[5][5], int depth, int alpha, int beta, bool maximizingPlayer) {
 	int v;
