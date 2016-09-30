@@ -59,7 +59,7 @@ int countCells(int direction,int i,int j,int width){
             
     }
 }
-void filterMoves(vector<int> &possibleMoves,vector<vector<int>> res,int numCells){
+void filterMoves(vector<vector<int>> &possibleMoves,vector<vector<int>> res,int numCells){
     //#nonZeroElements= atMax(numCells);
     for(int i = 0 ; i < res.size() ; i++) {
         int counterNonZero = 0;
@@ -69,8 +69,7 @@ void filterMoves(vector<int> &possibleMoves,vector<vector<int>> res,int numCells
 			}
 		}
 		if(counterNonZero<=numCells){
-		    possibleMoves.push_back(i);
-		    //or possibleMoves.push_back(res[i]);if possibleMoves is vector<vector<int>>
+		    possibleMoves.push_back(res[i]);
 		}
 	}
 }
@@ -82,7 +81,7 @@ int main() {
 	//place(stones, index, A, res);
 	A[0] = stones;
 	place_wrapper(stones, index, A, res, width);
-	//now i have
+	//now i have res
 	//incorporate i and j---i.e. position
     //incorporate direction
     //consider the number of blanks
@@ -95,13 +94,12 @@ int main() {
     int direction=0, i=2, j=2;
     int numCells=countCells(direction,i,j,width);
     //cout<<numCells<<endl;
-    vector<int> possibleMoves;
+    vector<vector<int>> possibleMoves;
     filterMoves(possibleMoves,res, numCells);
     //cout<<possibleMoves.size()<<" size"<<endl;
     for(int i = 0 ; i < possibleMoves.size() ; i++) {
-        int k=possibleMoves[i];
-		for(int j = 0 ; j < res[k].size() ; j++) {
-			cout<<res[k][j]<<" ";
+		for(int j = 0 ; j < possibleMoves[i].size() ; j++) {
+			cout<<possibleMoves[i][j]<<" ";
 		}
 		cout<<endl;
 	}
