@@ -18,7 +18,7 @@ class Game{
     public:
         int n;
         int total_squares;
-        vector<vector<int>> board;
+        vector<vector<pair<int, string>>> board;
         int turn;
         Game(int n);
         vector<Player> players;
@@ -34,7 +34,6 @@ class Game{
         string square_to_string(int i);
         int square_to_num(string square_string);
         void execute_move(string move_string);
-        //void partition(int n);
         bool check_valid(int square, char direction, vector<int> partition );
         vector<string> generate_stack_moves(int square);
         vector<string> generate_all_moves(int player);
@@ -74,16 +73,16 @@ Game::Game(int n){
 
 int Game::square_to_num(string square_string){
     // Return -1 if square_string is invalid
-    if (square_string.size() != 2)){
+    if (square_string.size() != 2){
         return -1;
     }
     if (!(isalpha(square_string[0])) || !(islower(square_string[0])) || !(isdigit(square_string[1]))){
         return -1;
     }
     int row = ((int) square_string[0])- 96;
-    int col = atoi(square_string[1]);
+    int col = (int)square_string[1];
     if (row < 1 || row > this->n || col < 1 || col > this->n)
-        return -1
+        return -1;
     return this->n * (col - 1) + (row - 1) ;
 }
 string Game::square_to_string(int square){
@@ -101,8 +100,8 @@ string Game::square_to_string(int square){
 
 void Game::execute_move(string move_string){
     ///Execute move
-  int current_piece = 0;
-  int square, count, next_square, next_count;
+    int current_piece = 0;
+    int square, count, next_square, next_count;
     if (this->turn == 0){
         this->moves += 1;
     }
@@ -110,11 +109,11 @@ void Game::execute_move(string move_string){
         current_piece = this->turn;
     }
     else{
-        current_piece = 1 - this->turn
+        current_piece = 1 - this->turn;
     }
     if (isalpha(move_string[0])){
-        square = this->square_to_num(move_string.substr(1));////////////////// hope this clears
-        pair<int, string> tmp_pair (current_piece, move_string[0]);
+        square = this->square_to_num(move_string.substr(1,3));////////////////// hope this clears
+        pair<int, string> tmp_pair (current_piece, string(1,move_string[0]));
         if (move_string[0] == 'F' || move_string[0] == 'S'){
             this->board[square].push_back(tmp_pair);/////////////????????????
             this->players[current_piece].flats -= 1;
@@ -142,8 +141,8 @@ void Game::execute_move(string move_string){
         for(int i =4;i< move_string.size();i++){
             next_count = (int)move_string[i];
             next_square = prev_square + change;
-            if (this->board[next_square].size() > 0) && (this->board[next_square].back().second == 'S'){
-                pair<int, string> tmp_pair (this->board[next_square].back().first, 'F');
+            if (this->board[next_square].size() > 0 && this->board[next_square].back().second == 'S'){
+                pair<int, string> tmp_pair (this->board[next_square].back().first, string(1,'F'));
                 this->board[next_square].back() = (tmp_pair);
             }
             if (next_count - count == 0){
