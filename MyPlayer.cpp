@@ -100,79 +100,79 @@ string Game::square_to_string(int square){
 }
 
 void Game::execute_move(string move_string){
-	///Execute move
+    ///Execute move
   int current_piece = 0;
   int square, count, next_square, next_count;
-	if (this->turn == 0){
-		this->moves += 1;
+    if (this->turn == 0){
+        this->moves += 1;
     }
-	if (this->moves != 1){
-		current_piece = this->turn;
+    if (this->moves != 1){
+        current_piece = this->turn;
     }
-	else{
-		current_piece = 1 - this->turn
+    else{
+        current_piece = 1 - this->turn
     }
-	if (isalpha(move_string[0])){
-		square = this->square_to_num(move_string.substr(1));////////////////// hope this clears
+    if (isalpha(move_string[0])){
+        square = this->square_to_num(move_string.substr(1));////////////////// hope this clears
     pair<int, string> tmp_pair (current_piece, move_string[0]);
-		if (move_string[0] == 'F' || move_string[0] == 'S'){
-			this->board[square].push_back(tmp_pair);/////////////????????????
-			this->players[current_piece].flats -= 1;
-		}
+        if (move_string[0] == 'F' || move_string[0] == 'S'){
+            this->board[square].push_back(tmp_pair);/////////////????????????
+            this->players[current_piece].flats -= 1;
+        }
     else if (move_string[0] == 'C'){
-			this->board[square].push_back(tmp_pair);
-			this->players[current_piece].capstones -= 1;
+            this->board[square].push_back(tmp_pair);
+            this->players[current_piece].capstones -= 1;
     }
-	}
+    }
   else if (isdigit(move_string[0])){
-		count = (int)move_string[0];
-		square = this->square_to_num(move_string.substr(1,2));///1:3 python excludes the latter digit
-		char direction = move_string[3];
-		if (direction == '+'){
-			change = this->n;
+        count = (int)move_string[0];
+        square = this->square_to_num(move_string.substr(1,2));///1:3 python excludes the latter digit
+        char direction = move_string[3];
+        if (direction == '+'){
+            change = this->n;
     }else if (direction == '-'){
-	    change = -this->n;
+        change = -this->n;
     }else if (direction == '>'){
-	    change = 1;
+        change = 1;
     }else if (direction == '<'){
-	    change = -1;
+        change = -1;
     }
-		int prev_square = square;
-		for( i =4;i< move_string.size();i++){
-			next_count = (int)move_string[i];
-			next_square = prev_square + change;
-			if (this->board[next_square].size() > 0) && (this->board[next_square].back().second == 'S'){
+        int prev_square = square;
+        for( i =4;i< move_string.size();i++){
+            next_count = (int)move_string[i];
+            next_square = prev_square + change;
+            if (this->board[next_square].size() > 0) && (this->board[next_square].back().second == 'S'){
         pair<int, string> tmp_pair (this->board[next_square].back().first, 'F');
-				this->board[next_square].back() = (tmp_pair);
+                this->board[next_square].back() = (tmp_pair);
       }
-			if (next_count - count == 0){
+            if (next_count - count == 0){
         for(int k = this->board[square].size() - count ; k < this->board[square].size() ; k++) {
           this->board[next_square].push_back(this->board[square][k]);
         }
-			}
+            }
       else{
         for(int k = this->board[square].size() - count ; k < this->board[square].size() - count + next_count ; k++) {
           this->board[next_square].push_back(this->board[square][k]);
         }
       }
-			prev_square = next_square;
-			count -= next_count;
+            prev_square = next_square;
+            count -= next_count;
     }
-		count = (int)move_string[0];
+        count = (int)move_string[0];
     vector<pair<int, string>> tmp_vect;
     for(int k = 0 ; k < this->board[square].size() - count ; k++) {
       tmp_vect.push_back(this->board[square][k]);
     }
-		this->board[square] = tmp_vect;
+        this->board[square] = tmp_vect;
   }
-	this->turn = 1 - this->turn;
+    this->turn = 1 - this->turn;
 }
 
 vector<vector<int>> Game::partition(int n){
-	///Generates all permutations of all partitions of n
-	vector<vector<int>> part_list, tmpList;
+    ///Generates all permutations of all partitions of n
+    vector<vector<int>> part_list, tmpList;
   vector<int> xx { n };
-	part_list.push_back(xx);//////////////// correct
+    part_list.push_back(xx);//////////////// correct
 
   for(int x = 1 ; x < n ; x++){
     tmpList = this->partition(n - x);
@@ -184,61 +184,61 @@ vector<vector<int>> Game::partition(int n){
       part_list.push_back(tmp_vect);
     }
   }
-	return part_list;
+    return part_list;
 }
 
 bool Game::check_valid(int square, char direction, vector<int> partition){
-	//For given movement (partition), check if stack on
-	///square can be moved in direction. Assumes active player
-	///is topmost color
+    //For given movement (partition), check if stack on
+    ///square can be moved in direction. Assumes active player
+    ///is topmost color
 
   int change, next_square;
-	if(direction == '+'){
-		change = this->n;
+    if(direction == '+'){
+        change = this->n;
   }
-	else if (direction == '-'){
-		change = -this->n;
+    else if (direction == '-'){
+        change = -this->n;
   }
-	else if (direction == '>'){
-		change = 1;
+    else if (direction == '>'){
+        change = 1;
   }
-	else if (direction == '<'){
-		change = -1;
+    else if (direction == '<'){
+        change = -1;
   }
-	for (i=0;i < partition.size();i++){
-		next_square = square + change * (i + 1);
-		if (this->board[next_square].size() > 0 && this->board[next_square].back().second == 'C'){
-			return false;
+    for (i=0;i < partition.size();i++){
+        next_square = square + change * (i + 1);
+        if (this->board[next_square].size() > 0 && this->board[next_square].back().second == 'C'){
+            return false;
     }
-		if (this->board[next_square].size() > 0 && this->board[next_square].back().second == 'S' && i != partition.size() - 1){
+        if (this->board[next_square].size() > 0 && this->board[next_square].back().second == 'S' && i != partition.size() - 1){
       return false;
     }
-		if (i == partition.size() - 1 && this->board[next_square] > 0 && this->board[next_square].back().second == 'S' && partition[i] > 1){
-			return false;
+        if (i == partition.size() - 1 && this->board[next_square] > 0 && this->board[next_square].back().second == 'S' && partition[i] > 1){
+            return false;
     }
-		if (i == partition.size()  - 1 && this->board[next_square].size()  > 0 && this->board[next_square].back().second == 'S' && this->board[square].back().second != 'C'){
-			return false;
+        if (i == partition.size()  - 1 && this->board[next_square].size()  > 0 && this->board[next_square].back().second == 'S' && this->board[square].back().second != 'C'){
+            return false;
     }
   }
-	return true;
+    return true;
 }
 
 vector<string> Game::generate_stack_moves(int square){
-	//Generate stack moves from square
-	//Assumes active player is topmost color
-	vector<string> all_moves;
-	int r = square % this->n;
-	int c = square / this->n;
-	int size = this->board[square].size();
-	char dirs[4] = ['+', '-', '<', '>'];
-	int up = this->n - 1 - c;
-	int down = c;
-	int right = this->n - 1 - r;
-	int left = r;
-	int rem_squares[4] = { up, down, left, right };
-	for(int num=0; num <min(size, this->n);num++){
-		vector<vector<int>> part_list = this->partition(num + 1);
-		for di in range(4){
+    //Generate stack moves from square
+    //Assumes active player is topmost color
+    vector<string> all_moves;
+    int r = square % this->n;
+    int c = square / this->n;
+    int size = this->board[square].size();
+    char dirs[4] = ['+', '-', '<', '>'];
+    int up = this->n - 1 - c;
+    int down = c;
+    int right = this->n - 1 - r;
+    int left = r;
+    int rem_squares[4] = { up, down, left, right };
+    for(int num=0; num <min(size, this->n);num++){
+        vector<vector<int>> part_list = this->partition(num + 1);
+        for di in range(4){
 
       vector<vector<int>> part_dir;
       for(int k = 0 ; k < part_list.size() ; k++) {
@@ -248,51 +248,51 @@ vector<string> Game::generate_stack_moves(int square){
       }
 
       vector<int> part;
-			for(int k = 0 ; k < part_dir.size() ; k++){
+            for(int k = 0 ; k < part_dir.size() ; k++){
         part = part_dir[k];
-				if (this->check_valid(square, dirs[di], part)){
+                if (this->check_valid(square, dirs[di], part)){
           string part_string  = "";
           int part_sum = 0;
           for(int j = 0 ; j < part.size() ; j++) {
             part_string += to_string(part[j]);
             part_sum += part[j];
           }
-					all_moves.push_back(to_string(part_sum) + this->all_squares[square] + dirs[di] + part_string);/////////
+                    all_moves.push_back(to_string(part_sum) + this->all_squares[square] + dirs[di] + part_string);/////////
         }
       }
 
     }
   }
-	return all_moves;
+    return all_moves;
 }
 
 vector<string> Game::generate_all_moves(Player player){
-	///Generate all possible moves for player
-	///Returns a list of move strings
-	vector<string> all_moves;
-	for (int i=0; i<this->board;i++){
-		if (this->board[i].size() == 0){
-			if (this->players[player].flats > 0){
-				all_moves.push_back("F" + this->all_squares[i]);
+    ///Generate all possible moves for player
+    ///Returns a list of move strings
+    vector<string> all_moves;
+    for (int i=0; i<this->board;i++){
+        if (this->board[i].size() == 0){
+            if (this->players[player].flats > 0){
+                all_moves.push_back("F" + this->all_squares[i]);
       }
-			if (this->moves != player and this->players[player].flats > 0){
-				all_moves.push_back("S" +this->all_squares[i]);
+            if (this->moves != player and this->players[player].flats > 0){
+                all_moves.push_back("S" +this->all_squares[i]);
       }
-			if (this->moves != player && this->players[player].capstones > 0){
-				all_moves.push_back("C" + this->all_squares[i]);
+            if (this->moves != player && this->players[player].capstones > 0){
+                all_moves.push_back("C" + this->all_squares[i]);
       }
     }
   }
 
   for (int i=0;i<this->board.size();i++){
-		if (this->board[i].size() > 0 && this->board[i].back().first == player){
+        if (this->board[i].size() > 0 && this->board[i].back().first == player){
       vector<string> tmp_vect = this->generate_stack_moves(i);
       for(int j = 0 ; j < tmp_vect.size() ; j++) {
         all_moves.push_back(tmp_vect[j]);
       }
     }
   }
-	return all_moves;
+    return all_moves;
 }
 
 class MyPlayer{
@@ -306,30 +306,38 @@ class MyPlayer{
 };
 
 MyPlayer::MyPlayer(){
-  string data[3] = sys.stdin.readline().strip().split();///////////////
-	this->player = (int)data[0] - 1;
-	this->n = (int)data[1];
-	this->time_left = (int)data[2];
-	this->game = Game(this->n);
-	this->play();
+    
+    char line[100];
+    cin.getline(line,100);
+    string data[3];
+    int i = 0;
+    stringstream ssin(line);
+    while (ssin.good() && i < 3){
+        ssin >> data[i];
+        ++i;
+    }
+    this->player = (int)data[0] - 1;
+    this->n = (int)data[1];
+    this->time_left = (int)data[2];
+    this->game = Game(this->n);
+    this->play();
 }
 
 void MyPlayer::play(){
   if (this->player == 1){
-		cin>>move ;/////////////strip
-		this->game.execute_move(move);
+        cin>>move ;/////////////strip
+        this->game.execute_move(move);
   }
-	while(1){
-		vector<string> all_moves = this->game.generate_all_moves(this->player);
-		string move = all_moves[rand()%all_moves.size()];///////////////////////rand() correct
-		this->game.execute_move(move);
-		move = move + '\n';
-		cout<<"Possible moves: "<< str(all_moves) << '\n';
-		cout<<"Chosen move: "<< move<<endl;
-		cout<<move<<endl;
-		cout.flush();
-		cin>>move;/////////////strip
-		this->game.execute_move(move);
+    while(1){
+        vector<string> all_moves = this->game.generate_all_moves(this->player);
+        string move = all_moves[rand()%all_moves.size()];///////////////////////rand() correct
+        this->game.execute_move(move);
+        move = move + '\n';
+        cout<<"Possible moves: "<< str(all_moves) << '\n';
+        cout<<"Chosen move: "<< move<<endl;
+        cout<<move<<std::flush;
+        cin>>move;/////////////strip
+        this->game.execute_move(move);
   }
 }
 int main(){
