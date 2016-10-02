@@ -18,9 +18,8 @@ int evaluation(MyPlayer node) {
 	return eval;
 }
 
-int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlayer, string res) {
+int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlayer, vector<string> res, vector<vector<string>> horizon) {
 	int v;
-  string temp_str;
 	MyPlayer child, child1, child2;
 	vector<string> all_moves = node.game.generate_all_moves(node.player);
 
@@ -50,15 +49,20 @@ int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlay
 			child = node;
 			child.execute_move(all_moves[i]);
 
-			int child_ab = alphabeta(child, alpha, beta, depth-1, false, temp_str);
+			int child_ab = alphabeta(child, alpha, beta, depth-1, false, res);
 			if(v < child_ab) {
 				v = child_ab;	// max(v, child_ab) ;
-				res = all_moves[i];
+				res.back() = all_moves[i];
 			}
 			alpha = max(alpha, v);
 			if(beta <= alpha)
 				break;
 		}
+		res.push_back("");
+    for(int i = 0 ; i < horizon.size() ; i++) {
+      if(res==horizon[i])
+        return -INT_MAX;
+    }
 		return v;
 	}
 	else {
@@ -84,25 +88,49 @@ int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlay
 			child = node;
 			child = execute_move(node, validMoves[i]);
 
-			int child_ab = alphabeta(child, alpha, beta, depth-1, false, temp_str);
+			int child_ab = alphabeta(child, alpha, beta, depth-1, false, res);
 			if(v > child_ab) {
 				v = child_ab;	// min(v, child_ab) ;
-				res = all_moves[i];
+				res.back() = all_moves[i];
 			}
 			beta = min(beta, v);
 			if(beta <= alpha)
 				break;
 		}
+		res.push_back("");
+    for(int i = 0 ; i < horizon.size() ; i++) {
+      if(res==horizon[i])
+        return INT_MAX;
+    }
 		return v;
 	}
+}
+
+bool safe_horizontal(MyPlayer node, vector<string> res) {
+	MyPlayer temp;
+	temp = node;
+	for(int i = 0 ; i < res.size() ; i++) {
+		temp.execute_move(move);
+	}
+	if(alphabetaUtil(temp, 3)==-INT_MAX)	// oppponent wins ; improve this ;
+		return false;
+	return true;
 }
 
 string alphabetaUtil(MyPlayer node) {
 	int depth = 6, alpha = -INT_MAX, beta = INT_MAX;
 	bool maximizingPlayer = true;
-	string res = "";
-	alphabeta(node, alpha, beta, depth, maximizingPlayer, res);
-	return res;
+	vector<string> res;
+  vector<vector<string>> horizon;
+	res.push_back("");
+	alphabeta(node, alpha, beta, depth, maximizingPlayer, res, horizon);
+  if(!safe_horizontal(node, res)) {
+    horizon.push_back(res);
+    res.clear();
+    res.push_back("");
+  	alphabeta(node, alpha, beta, depth, maximizingPlayer, res, horizon);
+  }
+	return res[0];
 }
 
 void MyPlayer::play(){
