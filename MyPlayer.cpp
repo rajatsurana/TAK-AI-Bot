@@ -80,7 +80,9 @@ int Game::square_to_num(string square_string){
         return -1;
     }
     int row = ((int) square_string[0])- 96;
-    int col = (int)square_string[1];
+    //cerr<<row<<" row"<<endl;
+    int col = (int)square_string[1] - (int)'0';
+    //cerr<<col<<" col"<<endl;
     if (row < 1 || row > this->n || col < 1 || col > this->n)
         return -1;
     return this->n * (col - 1) + (row - 1) ;
@@ -101,6 +103,7 @@ void Game::execute_move(string move_string){
     ///Execute move
     int current_piece = 0;
     int square, count, next_square, next_count;
+    //count=0;
     if (this->turn == 0){
         this->moves += 1;
     }
@@ -111,19 +114,31 @@ void Game::execute_move(string move_string){
         current_piece = 1 - this->turn;
     }
     if (isalpha(move_string[0])){
-        square = this->square_to_num(move_string.substr(1,3));////////////////// hope this clears
+		cerr<<move_string<<" isalpha"<<endl;
+		cerr<<move_string[0]<<" isalphabhai"<<endl;
+		//cerr<<count<<" isalphaCount"<<endl;
+        cerr<<move_string.substr(1)<<" meri square string"<<endl;
+        square = this->square_to_num(move_string.substr(1));////////////////// hope this clears
         pair<int, string> tmp_pair (current_piece, string(1,move_string[0]));
         if (move_string[0] == 'F' || move_string[0] == 'S'){
+			cerr<<move_string[0]<<" if isalpha"<<endl;
+			cerr<<square<<" square isalpha"<<endl;
             this->board[square].push_back(tmp_pair);/////////////????????????
             this->players[current_piece].flats -= 1;
+            
         }
         else if (move_string[0] == 'C'){
+			cerr<<move_string[0]<<" elif isalpha"<<endl;
                 this->board[square].push_back(tmp_pair);
                 this->players[current_piece].capstones -= 1;
         }
+        cerr<<"move_string[0]"<<" isalpha2"<<endl;
     }
   else if (isdigit(move_string[0])){
-        count = (int)move_string[0];
+	  
+        count = (int)move_string[0]-(int)'0';
+        cerr<<count<<" isdigit"<<endl;
+        cerr<<move_string<<" meri square string"<<endl;
         square = this->square_to_num(move_string.substr(1,2));///1:3 python excludes the latter digit
         char direction = move_string[3];
         int change =0;
@@ -138,9 +153,9 @@ void Game::execute_move(string move_string){
         }
         int prev_square = square;
         for(int i =4;i< move_string.size();i++){
-            next_count = (int)move_string[i];
+            next_count = (int)move_string[i]-(int)'0';
             next_square = prev_square + change;
-            if (this->board[next_square].size() > 0 && this->board[next_square].back().second == string(1,'S')){
+            if (this->board[next_square].size() > 0 && this->board[next_square].back().second==string(1,'S')){
                 pair<int, string> tmp_pair (this->board[next_square].back().first, string(1,'F'));
                 this->board[next_square].back() = (tmp_pair);
             }
@@ -157,7 +172,7 @@ void Game::execute_move(string move_string){
             prev_square = next_square;
             count -= next_count;
         }
-        count = (int)move_string[0];
+        count = (int)move_string[0]-(int)'0';
     vector<pair<int, string> > tmp_vect;
     for(int k = 0 ; k < this->board[square].size() - count ; k++) {
       tmp_vect.push_back(this->board[square][k]);
@@ -252,7 +267,6 @@ vector<string> Game::generate_stack_moves(int square){
                     int part_sum = 0;
                     for(int j = 0 ; j < part.size() ; j++) {
                         part_string.push_back('0'+part[j]);
-                        //part_string =part_string + to_string();
                         part_sum = part_sum + part[j];
                     }
                     string push;
@@ -298,22 +312,27 @@ class MyPlayer{
         int player;
         int n;
         int time_left;
-        Game game;
         MyPlayer();
+        Game game;
         void play();
 };
 
 MyPlayer::MyPlayer(){
-    
+    cerr<<"line88"<<endl;
     char line[100];
     cin.getline(line,100);
     string data[3];
     int i = 0;
+    cerr<<"line"<<endl;
+
     stringstream ssin(line);
     while (ssin.good() && i < 3){
         ssin >> data[i];
+        cerr<<data[i]<<" data"<<endl;
         ++i;
     }
+    
+    /*modify
     char *cstr = new char[data[0].length() + 1];
     strcpy(cstr, data[0].c_str());
     scanf(cstr,"%d",this->player);//
@@ -325,29 +344,47 @@ MyPlayer::MyPlayer(){
     char *cstr3 = new char[data[2].length() + 1];
     strcpy(cstr3, data[2].c_str());
     sprintf(cstr3,"%d",this->time_left);//2
+    *///modify
+    this->player=2;//stoi(data[0]);//2
+    this->n=5;//stoi(data[1]);//5
+    this->time_left=40;//stoi(data[2]);//40
+    
+    cerr<<"line88"<<endl;
     this->game = Game(this->n);
+    cerr<<"line8"<<endl;
     this->play();
 }
 
 void MyPlayer::play(){
+	/*
   if (this->player == 1){
-        string move;
+        string move="";
         cin>>move ;/////////////strip
+        cerr<<move<<"inputmove"<<endl;
         this->game.execute_move(move);
   }
+  */
+  //int i=0;
     while(1){
         vector<string> all_moves = this->game.generate_all_moves(this->player);
-        string move = all_moves[rand()%all_moves.size()];///////////////////////rand() correct
+        cerr<<all_moves[0]<<all_moves[1]<<all_moves[2]<<all_moves.size()<<endl;
+        string move = all_moves[0];///////////////////////rand() correct//rand()%all_moves.size()
         this->game.execute_move(move);
+        cerr<<move<<"outmove"<<endl;
         move = move + '\n';
         //cout<<"Possible moves: "<< str(all_moves) << '\n';
-        cout<<"Chosen move: "<< move<<endl;
+        //cout<<"Chosen move: "<< move<<endl;
         cout<<move<<std::flush;
+        
         cin>>move;/////////////strip
+        cerr<<move<<"inputsmove"<<endl;
         this->game.execute_move(move);
-  }
+        cerr<<move<<"execsmove"<<endl;
+    }
 }
 int main(){
-    //MyPlayer mp();
+    cerr<<"line1"<<endl;
+
+    MyPlayer mp;
     return 0;
 }
