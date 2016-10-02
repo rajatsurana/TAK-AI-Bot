@@ -18,6 +18,7 @@ class Game{
         int total_squares;
         vector<vector<pair<int, string> > > board;
         int turn;
+        Game();
         Game(int n);
         vector<Player> players;
         int max_flats;
@@ -37,6 +38,9 @@ class Game{
         vector<string> generate_all_moves(int player);
         vector<vector<int> > partition(int n);
 };
+Game::Game() {
+    
+}
 Game::Game(int n){
     this->n=n;
     this->total_squares=n*n;
