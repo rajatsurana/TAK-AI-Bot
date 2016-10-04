@@ -39,7 +39,7 @@ class Game{
         vector<vector<int> > partition(int n);
 };
 Game::Game() {
-    
+
 }
 Game::Game(int n){
     this->n=n;
@@ -114,31 +114,31 @@ void Game::execute_move(string move_string){
         current_piece = 1 - this->turn;
     }
     if (isalpha(move_string[0])){
-		cerr<<move_string<<" isalpha"<<endl;
-		cerr<<move_string[0]<<" isalphabhai"<<endl;
+		//cerr<<move_string<<" isalpha"<<endl;
+		//cerr<<move_string[0]<<" isalphabhai"<<endl;
 		//cerr<<count<<" isalphaCount"<<endl;
-        cerr<<move_string.substr(1)<<" meri square string"<<endl;
+        //cerr<<move_string.substr(1)<<" meri square string"<<endl;
         square = this->square_to_num(move_string.substr(1));////////////////// hope this clears
         pair<int, string> tmp_pair (current_piece, string(1,move_string[0]));
         if (move_string[0] == 'F' || move_string[0] == 'S'){
-			cerr<<move_string[0]<<" if isalpha"<<endl;
-			cerr<<square<<" square isalpha"<<endl;
+			//cerr<<move_string[0]<<" if isalpha"<<endl;
+			//cerr<<square<<" square isalpha"<<endl;
             this->board[square].push_back(tmp_pair);/////////////????????????
             this->players[current_piece].flats -= 1;
-            
+
         }
         else if (move_string[0] == 'C'){
-			cerr<<move_string[0]<<" elif isalpha"<<endl;
+			//cerr<<move_string[0]<<" elif isalpha"<<endl;
                 this->board[square].push_back(tmp_pair);
                 this->players[current_piece].capstones -= 1;
         }
-        cerr<<"move_string[0]"<<" isalpha2"<<endl;
+        //cerr<<"move_string[0]"<<" isalpha2"<<endl;
     }
   else if (isdigit(move_string[0])){
-	  
+
         count = (int)move_string[0]-(int)'0';
-        cerr<<count<<" isdigit"<<endl;
-        cerr<<move_string<<" meri square string"<<endl;
+        //cerr<<count<<" isdigit"<<endl;
+        //cerr<<move_string<<" meri square string"<<endl;
         square = this->square_to_num(move_string.substr(1,2));///1:3 python excludes the latter digit
         char direction = move_string[3];
         int change =0;
@@ -307,6 +307,12 @@ vector<string> Game::generate_all_moves(int player){
     }
     return all_moves;
 }
+
+
+int evaluation() {
+  return 1;
+}
+
 class MyPlayer{
     public:
         int player;
@@ -315,23 +321,25 @@ class MyPlayer{
         MyPlayer();
         Game game;
         void play();
+        int alphabeta(int alpha, int beta, int depth, bool maximizingPlayer, string &res, vector<string> all_moves);
+        string alphabetaUtil();
 };
 
 MyPlayer::MyPlayer(){
-    cerr<<"line88"<<endl;
+    //cerr<<"line88"<<endl;
     char line[100];
     cin.getline(line,100);
     string data[3];
     int i = 0;
-    cerr<<"line"<<endl;
+    //cerr<<"line"<<endl;
 
     stringstream ssin(line);
     while (ssin.good() && i < 3){
         ssin >> data[i];
-        cerr<<data[i]<<" data"<<endl;
+        //cerr<<data[i]<<" data"<<endl;
         ++i;
     }
-    
+
     /*modify
     char *cstr = new char[data[0].length() + 1];
     strcpy(cstr, data[0].c_str());
@@ -348,11 +356,80 @@ MyPlayer::MyPlayer(){
     this->player=2;//stoi(data[0]);//2
     this->n=5;//stoi(data[1]);//5
     this->time_left=40;//stoi(data[2]);//40
-    
-    cerr<<"line88"<<endl;
+
+    //cerr<<"line88"<<endl;
     this->game = Game(this->n);
-    cerr<<"line8"<<endl;
+    //cerr<<"line8"<<endl;
     this->play();
+}
+
+int MyPlayer::alphabeta(int alpha, int beta, int depth, bool maximizingPlayer, string &res, vector<string> all_moves) {
+  int v;
+  string temp_str;
+  vector<string> tmp_moves;
+  //vector<string> all_moves = this->game.generate_all_moves(this->player);
+  MyPlayer child = *this;
+
+  if(depth==0 || all_moves.size()==0)
+    return evaluation();  //return evaluation(node->game->board); // to implement
+
+  if(maximizingPlayer) {
+    v = -INT_MAX;
+    for(int i = 0 ; i < all_moves.size() ; i++) {
+      //cerr<<"depth : "<<depth<<"checking move : "<<all_moves[i]<<endl;
+      child = *this;
+      child.game.execute_move(all_moves[i]);
+      tmp_moves = child.game.generate_all_moves(child.player);
+
+      int child_ab = child.alphabeta(alpha, beta, depth-1, false, temp_str, tmp_moves);
+      if(v < child_ab) {
+        v = child_ab;
+        if(depth==2) {
+          res = all_moves[i];
+          cerr<<"res : "<<res<<endl;
+        }
+      }
+      alpha = max(alpha, v);
+      if(beta <= alpha)
+        break;
+    }
+    return v;
+  }
+
+  else {
+    v = INT_MAX;
+    for(int i = 0 ; i < all_moves.size() ; i++) {
+      //cerr<<"depth : "<<depth<<"checking move : "<<all_moves[i]<<endl;
+      child = *this;
+      child.game.execute_move(all_moves[i]);
+      tmp_moves = child.game.generate_all_moves(child.player);
+
+      int child_ab = child.alphabeta(alpha, beta, depth-1, false, temp_str, tmp_moves);
+      if(v > child_ab) {
+        v = child_ab;
+        if(depth==2) {
+          res = all_moves[i];
+          cerr<<"res : "<<res<<endl;
+        }
+      }
+      beta = min(beta, v);
+      if(beta <= alpha)
+        break;
+    }
+    return v;
+  }
+}
+
+string MyPlayer::alphabetaUtil() {
+  //cerr<<"in alpbetUtil\n";
+  vector<string> all_moves = this->game.generate_all_moves(this->player);
+  cerr<<all_moves.size()<<endl;
+	int depth = 2, alpha = -INT_MAX, beta = INT_MAX;
+	bool maximizingPlayer = true;
+	string val = "";
+	this->alphabeta(alpha, beta, depth, maximizingPlayer, val, all_moves);
+  cerr<<"val : "<<val<<endl;
+	return val;
 }
 
 void MyPlayer::play(){
@@ -367,23 +444,26 @@ void MyPlayer::play(){
   //int i=0;
     while(1){
         vector<string> all_moves = this->game.generate_all_moves(this->player);
-        cerr<<all_moves[0]<<all_moves[1]<<all_moves[2]<<all_moves.size()<<endl;
-        string move = all_moves[0];///////////////////////rand() correct//rand()%all_moves.size()
+        //cerr<<all_moves[0]<<all_moves[1]<<all_moves[2]<<all_moves.size()<<endl;
+        //string move = all_moves[0];///////////////////////rand() correct//rand()%all_moves.size() ; add alphabeta here ;
+        cerr<<"before util\n";
+        string move = this->alphabetaUtil();
         this->game.execute_move(move);
         cerr<<move<<"outmove"<<endl;
         move = move + '\n';
         //cout<<"Possible moves: "<< str(all_moves) << '\n';
         //cout<<"Chosen move: "<< move<<endl;
         cout<<move<<std::flush;
-        
+
         cin>>move;/////////////strip
         cerr<<move<<"inputsmove"<<endl;
         this->game.execute_move(move);
         cerr<<move<<"execsmove"<<endl;
     }
 }
+
 int main(){
-    cerr<<"line1"<<endl;
+    //cerr<<"line1"<<endl;
 
     MyPlayer mp;
     return 0;
