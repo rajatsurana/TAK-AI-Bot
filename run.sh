@@ -1,2 +1,2 @@
-g++ -o MyPlayer MyPlayer.cpp
-./MyPlayer
+g++ MyPlayer.cpp -o MyPlayer.exe; 
+./MyPlayer.exe
