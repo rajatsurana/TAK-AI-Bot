@@ -300,9 +300,6 @@ vector<string> Game::generate_all_moves(int player){
 }
 
 
-int evaluation() {
-  return 1;
-}
 
 class MyPlayer{
     public:
@@ -331,6 +328,56 @@ MyPlayer::MyPlayer(){
     this->game = Game(this->n);
     this->play();
 }
+int getNeighbour(int player_id) {
+  if(player_id==0)
+    return 1;
+  else
+    return 0;
+}
+int min(int a,int b){
+    return a>b?b:a;
+}
+int evaluation(MyPlayer node) {
+  /*if(isWin(node.player))  // road win , flat win , board completely filled
+    return INT_MAX;   // more priority to road win > flat win > board complete
+  if(isWin(node.player))
+    return -INT_MAX;*/
+  int in_flats, Nin_flats, out_flats, Nout_flats;
+
+  in_flats = (node.game.max_flats - node.game.players[node.player].flats);
+  Nin_flats = (node.game.max_flats - node.game.players[getNeighbour(node.player)].flats);
+
+  out_flats = node.game.players[node.player].flats;
+  Nout_flats = node.game.players[getNeighbour(node.player)].flats;
+
+  int count_0 = 0, count_1 = 0, stand_0 = 0, stand_1 = 0;   // counts tiles/stacks with top/control ; counts number of standing walls ;
+  int big_stack_0 = 0, big_stack_1 = 0;   // controlling big stacks ;
+  int center_0 = 0, center_1 = 0;         // distance from center ;
+  for(int i = 0 ; i < node.game.board.size() ; i++) {
+    if(node.game.board[i].size() > 0) {
+
+      if(node.game.board[i].back().second == "S") {  // standing stones ;
+        if(node.game.board[i].back().first == 0) // controlled by first player ;
+          stand_0++;
+        else
+          stand_1++;
+      }
+
+      if(node.game.board[i].back().first == 0) {// controlled by first player ;
+        count_0++;
+        big_stack_0 += (node.game.board[i].size());
+        //center_0 += min((i - 0), (node.game.board[i].size() - i));
+      }
+      else {
+        count_1++;
+        big_stack_1 += (node.game.board[i].size());
+        //center_1 += min((i - 0), (node.game.board[i].size() - i));
+      }
+    }
+  }
+
+  return in_flats - Nin_flats;
+}
 
 int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlayer, string &res) {
   //cerr<<"in alphbet\n";
@@ -340,7 +387,7 @@ int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlay
   vector<string> all_moves = node.game.generate_all_moves(node.player);
   //cerr<<all_moves.size()<<endl;
   if(depth==0 || all_moves.size()==0)
-    return evaluation();  //return evaluation(node->game->board); // to implement
+    return evaluation(node);  //return evaluation(node->game->board); // to implement
   if(maximizingPlayer) {
     v = -INT_MAX;
     for(int i = 0 ; i < all_moves.size() ; i++) {
@@ -403,7 +450,65 @@ void MyPlayer::play(){
         this->game.execute_move(move);
     }
 }
+/*
+void check_road_win(self, player){
+        '''Checks for a road win for player
+        '''
 
+        check_road_win(player, direction)
+            
+            visited = set()
+            dfs_stack = []
+            final_positions = set()
+            if (direction == 'ver'){
+                for i in xrange(self.n){
+                    if len(self.board[i]) > 0 and self.board[i][-1][0] == player and self.board[i][-1][1] != 'S':
+                        visited.add(i)
+                        dfs_stack.append(i)
+                    final_positions.add(self.total_squares - 1 - i)
+                }
+            }
+            else if (direction == 'hor'){
+                for i in xrange(self.n){
+                    if (len(self.board[i*self.n]) > 0) and (self.board[i*self.n][-1][0] == player) and (self.board[i*self.n][-1][1] != 'S'){
+                        visited.add(i*self.n)
+                        dfs_stack.append(i*self.n)
+                    }
+                    final_positions.add((i + 1) * self.n - 1)
+                }
+            }
+            while len(dfs_stack) > 0{
+                square = dfs_stack.pop();
+                if square in final_positions{
+                    return True
+                }
+                nbrs = self.get_neighbours(square)
+                for nbr in nbrs{
+                    if (nbr not in visited) and (len(self.board[nbr]) > 0) and (self.board[nbr][-1][0] == player) and (self.board[nbr][-1][1] != 'S'){
+                        dfs_stack.append(nbr)
+                        visited.add(nbr)
+                    }
+                }
+            return False
+
+        return check_road_win(player, 'hor') or check_road_win(player, 'ver')
+
+    }*/
+
+/*
+
+    Flat count
+    Standing stones, especially earlier in the game, especially if they can get on top of some stacks.
+    Your colour of pieces in stacks, even in stacks controlled by opponents.
+    Controlling big stacks.
+    Having control in the centre of the board.
+    Being close to finishing a road.
+    Being closer than opponent to finishing a road, more so the closer the road is to being finished. Remember, if the count is even, the advantage goes to whoever has the turn.
+    Having the option of spreading with a lot of flat gain.
+    Having the option of spreading on top of large stacks.
+    Some sneaky way of not counting spread options much if the opponent is able to spread on top of a stack before the spread is utilised.
+
+*/
 int main(){
     MyPlayer mp;
     return 0;
