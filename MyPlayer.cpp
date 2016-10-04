@@ -194,6 +194,7 @@ vector<vector<int> > Game::partition(int n){
         tmpList = this->partition(n - x);
         for(int y = 0 ; y < tmpList.size() ; y++) {
             vector<int> tmp_vect;////////////
+            tmp_vect.push_back(x);
             for(int k = 0 ; k < tmpList[y].size() ; k++) {
                 tmp_vect.push_back(tmpList[y][k]);
             }
@@ -298,7 +299,7 @@ vector<string> Game::generate_all_moves(int player){
     }
 
     for (int i=0;i<this->board.size();i++){
-        if (this->board[i].size() > 0 && this->board[i].back().first == player){
+        if (this->board[i].size() > 0 && this->board[i].back().first == player && this->moves != player){
             vector<string> tmp_vect = this->generate_stack_moves(i);
             for(int j = 0 ; j < tmp_vect.size() ; j++) {
                 all_moves.push_back(tmp_vect[j]);
@@ -327,7 +328,7 @@ MyPlayer::MyPlayer(){
     //cerr<<"line88"<<endl;
     char line[100];
     cin.getline(line,100);
-    string data[3];
+    int data[3];
     int i = 0;
     //cerr<<"line"<<endl;
 
@@ -351,9 +352,9 @@ MyPlayer::MyPlayer(){
     strcpy(cstr3, data[2].c_str());
     sprintf(cstr3,"%d",this->time_left);//2
     *///modify
-    this->player=2;//stoi(data[0]);//2
-    this->n=5;//stoi(data[1]);//5
-    this->time_left=40;//stoi(data[2]);//40
+    this->player=data[0]-1;//stoi(data[0]);//2
+    this->n=data[1];//stoi(data[1]);//5
+    this->time_left=data[2];//stoi(data[2]);//40
 
     //cerr<<"line88"<<endl;
     this->game = Game(this->n);
@@ -423,14 +424,14 @@ string alphabetaUtil(MyPlayer node) {
 }
 
 void MyPlayer::play(){
-	/*
+	
   if (this->player == 1){
         string move="";
         cin>>move ;/////////////strip
         cerr<<move<<"inputmove"<<endl;
         this->game.execute_move(move);
   }
-  */
+  
   //int i=0;
     while(1){
         vector<string> all_moves = this->game.generate_all_moves(this->player);
