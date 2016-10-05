@@ -33,9 +33,11 @@ class Game{
         string square_to_string(int i);
         int square_to_num(string square_string);
         void execute_move(string move_string);
+        void execute_move_opponent(string move_string,int player);
         bool check_valid(int square, char direction, vector<int> partition );
         vector<string> generate_stack_moves(int square);
         vector<string> generate_all_moves(int player);
+        vector<string> generate_all_moves_opponent(int player);
         vector<vector<int> > partition(int n);
 };
 Game::Game() {
@@ -98,6 +100,70 @@ string Game::square_to_string(int square){
     s.push_back((char)(row + 97));
     s.push_back('0' + col+1);
     return s;
+}
+void Game::execute_move_opponent(string move_string,int player){
+    ///Execute move
+    int current_piece = player;
+    int square, count, next_square, next_count;
+    //count=0;
+    
+    if (isalpha(move_string[0])){
+        square = this->square_to_num(move_string.substr(1));
+        pair<int, string> tmp_pair (current_piece, string(1,move_string[0]));
+        if (move_string[0] == 'F' || move_string[0] == 'S'){
+            this->board[square].push_back(tmp_pair);
+            //cerr<<tmp_pair.first<<" "<<tmp_pair.second<<" turn:"<< this->turn<<endl;
+            this->players[current_piece].flats -= 1;
+        }
+        else if (move_string[0] == 'C'){
+                this->board[square].push_back(tmp_pair);
+                this->players[current_piece].capstones -= 1;
+        }
+
+    }
+  else if (isdigit(move_string[0])){
+        count = (int)move_string[0]-(int)'0';
+        square = this->square_to_num(move_string.substr(1,2));///1:3 python excludes the latter digit
+        char direction = move_string[3];
+        int change =0;
+        if (direction == '+'){
+            change = this->n;
+        }else if (direction == '-'){
+            change = -this->n;
+        }else if (direction == '>'){
+            change = 1;
+        }else if (direction == '<'){
+            change = -1;
+        }
+        int prev_square = square;
+        for(int i =4;i< move_string.size();i++){
+            next_count = (int)move_string[i]-(int)'0';
+            next_square = prev_square + change;
+            if (this->board[next_square].size() > 0 && this->board[next_square].back().second==string(1,'S')){
+                pair<int, string> tmp_pair (this->board[next_square].back().first, string(1,'F'));
+                this->board[next_square].back() = (tmp_pair);
+            }
+            if (next_count - count == 0){
+                for(int k = this->board[square].size() - count ; k < this->board[square].size() ; k++) {
+                  this->board[next_square].push_back(this->board[square][k]);
+                }
+            }
+            else{
+                for(int k = this->board[square].size() - count ; k < this->board[square].size() - count + next_count ; k++) {
+                  this->board[next_square].push_back(this->board[square][k]);
+                }
+            }
+            prev_square = next_square;
+            count -= next_count;
+        }
+        count = (int)move_string[0]-(int)'0';
+    vector<pair<int, string> > tmp_vect;
+    for(int k = 0 ; k < this->board[square].size() - count ; k++) {
+      tmp_vect.push_back(this->board[square][k]);
+    }
+        this->board[square] = tmp_vect;
+  }
+    this->turn = 1 - this->turn;
 }
 void Game::execute_move(string move_string){
     ///Execute move
@@ -269,7 +335,24 @@ vector<string> Game::generate_stack_moves(int square){
     }
     return all_moves;
 }
+vector<string> Game::generate_all_moves_opponent(int player){
+  vector<string> all_moves;
+    for (int i=0; i<this->board.size();i++){
+        if (this->board[i].size() == 0){
+            if (this->players[player].flats > 0){
+                all_moves.push_back("F" + this->all_squares[i]);
+            }
+            if (this->moves != player and this->players[player].flats > 0){
 
+                all_moves.push_back("S" +this->all_squares[i]);
+            }
+            if (this->moves != player && this->players[player].capstones > 0){
+                all_moves.push_back("C" + this->all_squares[i]);
+            }
+        }
+    }
+    return all_moves;
+}
 vector<string> Game::generate_all_moves(int player){
     ///Generate all possible moves for player
     ///Returns a list of move strings
@@ -281,6 +364,7 @@ vector<string> Game::generate_all_moves(int player){
             }
             if (this->moves != player and this->players[player].flats > 0){
                 all_moves.push_back("S" +this->all_squares[i]);
+
             }
             if (this->moves != player && this->players[player].capstones > 0){
                 all_moves.push_back("C" + this->all_squares[i]);
@@ -468,11 +552,20 @@ float evaluation(MyPlayer node) {
   // Current function account for - # stack controlled , bigger stack controlled , flat stones and center pieces ;
   if(node.player == 1) {
     road_0 = max(road_0 - 2, 0);
-    return (0.05*(center_1)/(node.game.n*node.game.board.size())) + (0.1*flat_1/node.game.board.size()) + (0.1*big_stack_1/(node.game.max_flats*node.game.n)) + (0.2*road_1) - (0.15*road_0*road_0);
+    return (0.1*(center_1)/(node.game.n*node.game.board.size())) + (0.1*flat_1/node.game.board.size()) + (0.1*big_stack_1/(node.game.max_flats*node.game.n)) + (0.2*road_1) - (0.15*road_0*road_0);
+    
+    //child.game.execute_move(all_moves[i]);
+    //child.game.board;
+    //if road1>road0
+    //return 
+    //final : (0.1*(center_1)/(node.game.n*node.game.board.size())) + (0.1*flat_1/node.game.board.size()) + (0.1*big_stack_1/(node.game.max_flats*node.game.n)) + (0.2*road_1);
+    //return (0.4*road_0) - (0.3*road_1*road_1) + (0.2*(flat_0 - flat_1)/node.game.board.size()) + (0.1*(big_stack_0 - big_stack_1)/node.game.max_flats) + (0.3*(count_0 - count_1)/node.game.board.size()) + (0.15*(center_0 - center_1));
   }
   else {
     road_1 = max(road_1 - 2, 0);
-    return (0.05*(center_0)/(node.game.n*node.game.board.size())) + (0.1*flat_0/node.game.board.size()) + (0.1*big_stack_0/(node.game.max_flats*node.game.n)) + (0.2*road_0) - (0.15*road_1*road_1);
+    return (0.1*(center_0)/(node.game.n*node.game.board.size())) + (0.1*flat_0/node.game.board.size()) + (0.1*big_stack_0/(node.game.max_flats*node.game.n)) + (0.2*road_0) - (0.15*road_1*road_1);
+    //final : (0.1*(center_0)/(node.game.n*node.game.board.size())) + (0.1*flat_0/node.game.board.size()) + (0.1*big_stack_0/(node.game.max_flats*node.game.n)) + (0.2*road_0);
+    //return (0.4*road_1) - (0.3*road_0*road_0) + (0.2*(flat_1 - flat_0)/node.game.board.size()) + (0.1*(big_stack_1 - big_stack_0)/node.game.max_flats) + (0.3*(count_1 - count_0)/node.game.board.size()) + (0.15*(center_1 - center_0));
   }
 }
 
@@ -532,7 +625,7 @@ float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPl
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
-      child.player = child.game.turn;
+      child.player=child.game.turn;
       float child_ab = alphabeta(child, alpha, beta, depth-1, false, temp_str);
       if(v < child_ab) {
         v = child_ab;
@@ -550,7 +643,7 @@ float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPl
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
-      child.player = child.game.turn;
+      child.player=child.game.turn;
       float child_ab = alphabeta(child, alpha, beta, depth-1, true, temp_str);
       if(v > child_ab) {
         v = child_ab;
@@ -563,13 +656,50 @@ float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPl
     return v;
   }
 }
-
+int genMove(MyPlayer child,string move){
+      child.game.execute_move_opponent(move,1-child.player);
+      return longRoad(child.game.board, 1-child.player);
+}
+int checkRoadLen(MyPlayer node,string &change){
+  MyPlayer child=node;
+  vector<string> all_moves = child.game.generate_all_moves_opponent(1-node.player);
+  int childRoadLength=0;
+  for(int i=0;i<all_moves.size();i++){
+      //MyPlayer childNew=node;
+      int len = genMove(child,all_moves[i]);
+      
+      childRoadLength=len;
+      if(len>=3){
+        change=all_moves[i];
+        break;
+      }
+      
+  }
+    return childRoadLength;
+    //child.game.board;
+}
 string alphabetaUtil(MyPlayer node) {
   vector<string> all_moves = node.game.generate_all_moves(node.player);
 	int depth = 2, alpha = -INT_MAX, beta = INT_MAX;
 	bool maximizingPlayer = false;
 	string val = "";
-	alphabeta(node, alpha, beta, depth, maximizingPlayer, val);
+	//alphabeta(node, alpha, beta, depth, maximizingPlayer, val);
+  string change="";
+  int opponentLength=checkRoadLen(node,change);//opponent
+  int mylength=longRoad(node.game.board, node.player);
+  if( mylength<opponentLength && opponentLength>=3)
+  {
+      string cg=change.substr(1);
+     // cerr<<cg<<endl;
+      if(node.game.board[node.game.square_to_num(cg)].size()==0){
+          return change;
+      }    
+  }
+
+  alphabeta(node, alpha, beta, depth, maximizingPlayer, val);
+  
+  
+
 	return val;
 }
 
@@ -581,15 +711,10 @@ void MyPlayer::play(){
     }
     while(1){
         vector<string> all_moves = this->game.generate_all_moves(this->player);
-        /*if(this->game.moves == 0) {
-          cout<<"Fb1";
-        }
-        else {*/
-          string move = alphabetaUtil(*this);
-          this->game.execute_move(move);
-          move = move + '\n';
-          cout<<move<<std::flush;
-        //}
+        string move = alphabetaUtil(*this);
+        this->game.execute_move(move);
+        move = move + '\n';
+        cout<<move<<std::flush;
         cin>>move;
         this->game.execute_move(move);
     }
