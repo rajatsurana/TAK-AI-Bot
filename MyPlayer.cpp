@@ -336,26 +336,24 @@ int getNeighbour(int player_id) {
     return 0;
 }
 
+int max(int a,int b){
+    return a<b?b:a;
+}
+
 int min(int a,int b){
     return a>b?b:a;
 }
 
-int evaluation(MyPlayer node) {
+float evaluation(MyPlayer node) {
   /*if(isWin(node.player))  // road win , flat win , board completely filled
     return INT_MAX;   // more priority to road win > flat win > board complete
   if(isWin(node.player))
     return -INT_MAX;*/
-  int in_flats, Nin_flats, out_flats, Nout_flats;
-
-  in_flats = (node.game.max_flats - node.game.players[node.player].flats);
-  Nin_flats = (node.game.max_flats - node.game.players[getNeighbour(node.player)].flats);
-
-  out_flats = node.game.players[node.player].flats;
-  Nout_flats = node.game.players[getNeighbour(node.player)].flats;
 
   int count_0 = 0, count_1 = 0, stand_0 = 0, stand_1 = 0;   // counts tiles/stacks with top/control ; counts number of standing walls ;
   int big_stack_0 = 0, big_stack_1 = 0;   // controlling big stacks ;
   int center_0 = 0, center_1 = 0;         // distance from center ;
+  int flat_0 = 0, flat_1 = 0;
   for(int i = 0 ; i < node.game.board.size() ; i++) {
     if(node.game.board[i].size() > 0) {
 
@@ -366,26 +364,38 @@ int evaluation(MyPlayer node) {
           stand_1++;
       }
 
+      if(node.game.board[i].back().second == "F") {  // flats stones ;
+        if(node.game.board[i].back().first == 0) // controlled by first player ;
+          flat_0++;
+        else
+          flat_1++;
+      }
+
       if(node.game.board[i].back().first == 0) {// controlled by first player ;
         count_0++;
         big_stack_0 += (node.game.board[i].size());
-        center_0 += min((i - 0), (node.game.board[i].size() - i));
+        center_0 += min((i - 0), (node.game.board.size() - i));
       }
       else {
         count_1++;
         big_stack_1 += (node.game.board[i].size());
-        center_1 += min((i - 0), (node.game.board[i].size() - i));
+        center_1 += min((i - 0), (node.game.board.size() - i));
       }
     }
   }
 
-  return in_flats - Nin_flats;
+  // Normallize all functions first ;
+  // Current function account for - # stack controlled , bigger stack controlled , flat stones and center pieces ;
+  if(node.player == 1)
+    return (0.2*(flat_0 - flat_1)/node.game.board.size()) + (0.2*(big_stack_0 - big_stack_1)/node.game.max_flats) + (0.4*(count_0 - count_1)/node.game.board.size()) + (0.15*(center_0 - center_1)/node.game.board.size());
+  else
+    return (0.2*(flat_1 - flat_0)/node.game.board.size()) + (0.2*(big_stack_1 - big_stack_0)/node.game.max_flats) + (0.4*(count_1 - count_0)/node.game.board.size()) + (0.15*(center_1 - center_0)/node.game.board.size());
 }
 
 vector<string> sort_by_eval(MyPlayer node, vector<string> all_moves, bool maximizingPlayer) {
   string tmp_str;
-  int tmp_val;
-  vector<int> child_eval;
+  float tmp_val;
+  vector<float> child_eval;
 
   for(int i = 0 ; i < all_moves.size() ; i++) {
     MyPlayer child = node;
@@ -423,7 +433,7 @@ vector<string> sort_by_eval(MyPlayer node, vector<string> all_moves, bool maximi
   return all_moves;
 }
 
-int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlayer, string &res) {
+float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlayer, string &res) {
   int v;
   string temp_str;
   MyPlayer child = node;
@@ -438,7 +448,7 @@ int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlay
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
-      int child_ab = alphabeta(child, alpha, beta, depth-1, false, temp_str);
+      float child_ab = alphabeta(child, alpha, beta, depth-1, false, temp_str);
       if(v < child_ab) {
         v = child_ab;
         res = all_moves[i];
@@ -455,7 +465,7 @@ int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlay
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
-      int child_ab = alphabeta(child, alpha, beta, depth-1, false, temp_str);
+      float child_ab = alphabeta(child, alpha, beta, depth-1, false, temp_str);
       if(v > child_ab) {
         v = child_ab;
         res = all_moves[i];
@@ -541,7 +551,6 @@ void check_road_win(self, player){
     }*/
 
 /*
-
     Flat count
     Standing stones, especially earlier in the game, especially if they can get on top of some stacks.
     Your colour of pieces in stacks, even in stacks controlled by opponents.
