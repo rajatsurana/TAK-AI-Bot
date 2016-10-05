@@ -344,15 +344,87 @@ int min(int a,int b){
     return a>b?b:a;
 }
 
+void isRoadUtil(vector<vector<int> > &A, int x, int y, int n) {
+	A[x][y] = -1;
+	if(x-1>=0 && A[x-1][y]==1)
+		isRoadUtil(A, x-1, y, n);
+	if(y-1>=0 && A[x][y-1]==1)
+		isRoadUtil(A, x, y-1, n);
+	if(x+1<n && A[x+1][y]==1)
+		isRoadUtil(A, x+1, y, n);
+	if(y+1<n && A[x][y+1]==1)
+		isRoadUtil(A, x, y+1, n);
+}
+
+int getRoadLen(vector<vector<int> > A) {
+  int x_min = A.size()+1, y_min = A.size()+1;
+  int x_max = -1, y_max = -1;
+  for(int i = 0 ; i < A.size() ; i++) {
+    for(int j = 0 ; j < A[i].size() ; j++) {
+      if(A[i][j] == -1) {
+        if(i < x_min)
+          x_min = i;
+        if(j < y_min)
+          y_min = j;
+        if(i > x_max)
+          x_max = i;
+        if(j > y_max)
+          y_max = j;
+      }
+    }
+  }
+  return max(y_max - y_min, x_max - x_min);
+}
+
+vector<vector<int> > clearNeg(vector<vector<int> > A) {
+  for(int i = 0 ; i < A.size() ; i++) {
+    for(int j = 0 ; j < A[i].size() ; j++) {
+      if(A[i][j] == -1)
+        A[i][j] = 0;
+    }
+  }
+  return A;
+}
+
+int longRoad(vector<vector<pair<int, string> > > board, int player) {
+  int N = sqrt(board.size());
+  vector<vector<int> > stor_play;
+  for(int i = 0 ; i < N ; i++) {
+    vector<int> tmp_vect;
+    for(int j = 0 ; j < N ; j++) {
+      tmp_vect.push_back(0);
+    }
+    stor_play.push_back(tmp_vect);
+  }
+  for(int i = 0 ; i < board.size() ; i++) {
+    int row = i % N;
+    int col = i / N;
+    if(board[i].size() > 0) {
+      if(board[i].back().first == player && board[i].back().second == "F") {
+        stor_play[row][col] = 1;
+      }
+    }
+  }
+
+  int road_len = 0;
+  for(int i = 0 ; i < stor_play.size() ; i++) {
+    for(int j = 0 ; j < stor_play[i].size() ; j++) {
+      if(stor_play[i][j] == 1) {
+        isRoadUtil(stor_play, i, j, N);
+        road_len = max(road_len, getRoadLen(stor_play));
+        stor_play = clearNeg(stor_play);
+      }
+    }
+  }
+
+  return road_len;
+}
+
 float evaluation(MyPlayer node) {
-  /*if(isWin(node.player))  // road win , flat win , board completely filled
-    return INT_MAX;   // more priority to road win > flat win > board complete
-  if(isWin(node.player))
-    return -INT_MAX;*/
 
   int count_0 = 0, count_1 = 0, stand_0 = 0, stand_1 = 0;   // counts tiles/stacks with top/control ; counts number of standing walls ;
   int big_stack_0 = 0, big_stack_1 = 0;   // controlling big stacks ;
-  int center_0 = 0, center_1 = 0;         // distance from center ;
+  float center_0 = 0, center_1 = 0;         // distance from center ;
   int flat_0 = 0, flat_1 = 0;
   for(int i = 0 ; i < node.game.board.size() ; i++) {
     if(node.game.board[i].size() > 0) {
@@ -371,25 +443,34 @@ float evaluation(MyPlayer node) {
           flat_1++;
       }
 
+      int row = i % node.game.n;
+      int col = i / node.game.n;
       if(node.game.board[i].back().first == 0) {// controlled by first player ;
         count_0++;
         big_stack_0 += (node.game.board[i].size());
-        center_0 += min((i - 0), (node.game.board.size() - i));
+        center_0 += (min((row - 0), (node.game.n - row)) + min((col - 0), (node.game.n - col)))/node.game.n;
       }
       else {
         count_1++;
         big_stack_1 += (node.game.board[i].size());
-        center_1 += min((i - 0), (node.game.board.size() - i));
+        center_1 += (min((row - 0), (node.game.n - row)) + min((col - 0), (node.game.n - col)))/node.game.n;
       }
     }
   }
 
+  int road_0 = longRoad(node.game.board, 0);
+  int road_1 = longRoad(node.game.board, 1);
+
   // Normallize all functions first ;
   // Current function account for - # stack controlled , bigger stack controlled , flat stones and center pieces ;
-  if(node.player == 1)
-    return (0.2*(flat_0 - flat_1)/node.game.board.size()) + (0.2*(big_stack_0 - big_stack_1)/node.game.max_flats) + (0.4*(count_0 - count_1)/node.game.board.size()) + (0.15*(center_0 - center_1)/node.game.board.size());
-  else
-    return (0.2*(flat_1 - flat_0)/node.game.board.size()) + (0.2*(big_stack_1 - big_stack_0)/node.game.max_flats) + (0.4*(count_1 - count_0)/node.game.board.size()) + (0.15*(center_1 - center_0)/node.game.board.size());
+  if(node.player == 1) {
+    road_1 = max(road_1 - 2, 0);
+    return (0.4*road_0) - (0.3*road_1*road_1) + (0.2*(flat_0 - flat_1)/node.game.board.size()) + (0.1*(big_stack_0 - big_stack_1)/node.game.max_flats) + (0.3*(count_0 - count_1)/node.game.board.size()) + (0.15*(center_0 - center_1));
+  }
+  else {
+    road_0 = max(road_0 - 2, 0);
+    return (0.4*road_1) - (0.3*road_0*road_0) + (0.2*(flat_1 - flat_0)/node.game.board.size()) + (0.1*(big_stack_1 - big_stack_0)/node.game.max_flats) + (0.3*(count_1 - count_0)/node.game.board.size()) + (0.15*(center_1 - center_0));
+  }
 }
 
 vector<string> sort_by_eval(MyPlayer node, vector<string> all_moves, bool maximizingPlayer) {
@@ -479,9 +560,7 @@ float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPl
 }
 
 string alphabetaUtil(MyPlayer node) {
-    //cerr<<"in alpbetUtil\n";
-    vector<string> all_moves = node.game.generate_all_moves(node.player);
-    //cerr<<all_moves.size()<<endl;
+  vector<string> all_moves = node.game.generate_all_moves(node.player);
 	int depth = 2, alpha = -INT_MAX, beta = INT_MAX;
 	bool maximizingPlayer = true;
 	string val = "";
@@ -562,6 +641,7 @@ void check_road_win(self, player){
     Having the option of spreading on top of large stacks.
     Some sneaky way of not counting spread options much if the opponent is able to spread on top of a stack before the spread is utilised.
 
+    High eval if : road win , flat win , board completely filled ;
 */
 int main(){
     MyPlayer mp;
