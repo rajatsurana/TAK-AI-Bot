@@ -80,9 +80,9 @@ int Game::square_to_num(string square_string){
         return -1;
     }
     int row = ((int) square_string[0])- 96;
-    
+
     int col = (int)square_string[1] - (int)'0';
-    
+
     if (row < 1 || row > this->n || col < 1 || col > this->n)
         return -1;
     return this->n * (col - 1) + (row - 1) ;
@@ -125,7 +125,7 @@ void Game::execute_move(string move_string){
                 this->board[square].push_back(tmp_pair);
                 this->players[current_piece].capstones -= 1;
         }
-        
+
     }
   else if (isdigit(move_string[0])){
         count = (int)move_string[0]-(int)'0';
@@ -312,7 +312,7 @@ class MyPlayer{
 };
 
 MyPlayer::MyPlayer(){
-    
+
     char line[100];
     cin.getline(line,100);
     int data[3];
@@ -328,15 +328,18 @@ MyPlayer::MyPlayer(){
     this->game = Game(this->n);
     this->play();
 }
+
 int getNeighbour(int player_id) {
   if(player_id==0)
     return 1;
   else
     return 0;
 }
+
 int min(int a,int b){
     return a>b?b:a;
 }
+
 int evaluation(MyPlayer node) {
   /*if(isWin(node.player))  // road win , flat win , board completely filled
     return INT_MAX;   // more priority to road win > flat win > board complete
@@ -366,12 +369,12 @@ int evaluation(MyPlayer node) {
       if(node.game.board[i].back().first == 0) {// controlled by first player ;
         count_0++;
         big_stack_0 += (node.game.board[i].size());
-        //center_0 += min((i - 0), (node.game.board[i].size() - i));
+        center_0 += min((i - 0), (node.game.board[i].size() - i));
       }
       else {
         count_1++;
         big_stack_1 += (node.game.board[i].size());
-        //center_1 += min((i - 0), (node.game.board[i].size() - i));
+        center_1 += min((i - 0), (node.game.board[i].size() - i));
       }
     }
   }
@@ -379,15 +382,57 @@ int evaluation(MyPlayer node) {
   return in_flats - Nin_flats;
 }
 
+vector<string> sort_by_eval(MyPlayer node, vector<string> all_moves, bool maximizingPlayer) {
+  string tmp_str;
+  int tmp_val;
+  vector<int> child_eval;
+
+  for(int i = 0 ; i < all_moves.size() ; i++) {
+    MyPlayer child = node;
+    child.game.execute_move(all_moves[i]);
+    child_eval.push_back(evaluation(child));
+  }
+
+  for(int i = 0 ; i < all_moves.size() ; i++) {
+    for(int j = 0 ; j < i ; j++) {
+      if(maximizingPlayer) {    // sort descending by evaluation fn
+        if(child_eval[i] < child_eval[j]) {
+          tmp_val = child_eval[i];
+          child_eval[i] = child_eval[j];
+          child_eval[j] = tmp_val;
+
+          tmp_str = all_moves[i];
+          all_moves[i] = all_moves[j];
+          all_moves[j] = tmp_str;
+        }
+      }
+      else {                    // sort ascending by evaluation fn
+        if(child_eval[i] > child_eval[j]) {
+          tmp_val = child_eval[i];
+          child_eval[i] = child_eval[j];
+          child_eval[j] = tmp_val;
+
+          tmp_str = all_moves[i];
+          all_moves[i] = all_moves[j];
+          all_moves[j] = tmp_str;
+        }
+      }
+    }
+  }
+
+  return all_moves;
+}
+
 int alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlayer, string &res) {
-  //cerr<<"in alphbet\n";
   int v;
   string temp_str;
   MyPlayer child = node;
   vector<string> all_moves = node.game.generate_all_moves(node.player);
-  //cerr<<all_moves.size()<<endl;
+  all_moves = sort_by_eval(node, all_moves, maximizingPlayer);
+
   if(depth==0 || all_moves.size()==0)
-    return evaluation(node);  //return evaluation(node->game->board); // to implement
+    return evaluation(node);
+
   if(maximizingPlayer) {
     v = -INT_MAX;
     for(int i = 0 ; i < all_moves.size() ; i++) {
@@ -456,7 +501,7 @@ void check_road_win(self, player){
         '''
 
         check_road_win(player, direction)
-            
+
             visited = set()
             dfs_stack = []
             final_positions = set()
