@@ -400,7 +400,7 @@ int longRoad(vector<vector<pair<int, string> > > board, int player) {
     int row = i % N;
     int col = i / N;
     if(board[i].size() > 0) {
-      if(board[i].back().first == player && board[i].back().second == "F") {
+      if(board[i].back().first == player && board[i].back().second != "S") {
         stor_play[row][col] = 1;
       }
     }
@@ -424,8 +424,9 @@ float evaluation(MyPlayer node) {
 
   int count_0 = 0, count_1 = 0, stand_0 = 0, stand_1 = 0;   // counts tiles/stacks with top/control ; counts number of standing walls ;
   int big_stack_0 = 0, big_stack_1 = 0;   // controlling big stacks ;
-  float center_0 = 0, center_1 = 0;         // distance from center ;
+  int center_0 = 0, center_1 = 0;         // distance from center ;
   int flat_0 = 0, flat_1 = 0;
+
   for(int i = 0 ; i < node.game.board.size() ; i++) {
     if(node.game.board[i].size() > 0) {
 
@@ -448,12 +449,14 @@ float evaluation(MyPlayer node) {
       if(node.game.board[i].back().first == 0) {// controlled by first player ;
         count_0++;
         big_stack_0 += (node.game.board[i].size());
-        center_0 += (min((row - 0), (node.game.n - row)) + min((col - 0), (node.game.n - col)))/node.game.n;
+        center_0 += min((row - 0), (node.game.n - 1 - row)) + min((col - 0), (node.game.n - 1 - col));
+        //center_0 += min((i - 0), (node.game.board.size() - i));
       }
       else {
         count_1++;
         big_stack_1 += (node.game.board[i].size());
-        center_1 += (min((row - 0), (node.game.n - row)) + min((col - 0), (node.game.n - col)))/node.game.n;
+        center_1 += min((row - 0), (node.game.n - 1 - row)) + min((col - 0), (node.game.n - 1 - col));
+        //center_1 += min((i - 0), (node.game.board.size() - i));
       }
     }
   }
@@ -464,12 +467,16 @@ float evaluation(MyPlayer node) {
   // Normallize all functions first ;
   // Current function account for - # stack controlled , bigger stack controlled , flat stones and center pieces ;
   if(node.player == 1) {
-    road_1 = max(road_1 - 2, 0);
-    return (0.4*road_0) - (0.3*road_1*road_1) + (0.2*(flat_0 - flat_1)/node.game.board.size()) + (0.1*(big_stack_0 - big_stack_1)/node.game.max_flats) + (0.3*(count_0 - count_1)/node.game.board.size()) + (0.15*(center_0 - center_1));
+    road_0 = max(road_0 - 2, 0);
+    return (0.1*(center_1)/(node.game.n*node.game.board.size())) + (0.1*flat_1/node.game.board.size()) + (0.1*big_stack_1/(node.game.max_flats*node.game.n)) + (0.2*road_1) - (0.15*road_0*road_0);
+    //final : (0.1*(center_1)/(node.game.n*node.game.board.size())) + (0.1*flat_1/node.game.board.size()) + (0.1*big_stack_1/(node.game.max_flats*node.game.n)) + (0.2*road_1);
+    //return (0.4*road_0) - (0.3*road_1*road_1) + (0.2*(flat_0 - flat_1)/node.game.board.size()) + (0.1*(big_stack_0 - big_stack_1)/node.game.max_flats) + (0.3*(count_0 - count_1)/node.game.board.size()) + (0.15*(center_0 - center_1));
   }
   else {
-    road_0 = max(road_0 - 2, 0);
-    return (0.4*road_1) - (0.3*road_0*road_0) + (0.2*(flat_1 - flat_0)/node.game.board.size()) + (0.1*(big_stack_1 - big_stack_0)/node.game.max_flats) + (0.3*(count_1 - count_0)/node.game.board.size()) + (0.15*(center_1 - center_0));
+    road_1 = max(road_1 - 2, 0);
+    return (0.1*(center_0)/(node.game.n*node.game.board.size())) + (0.1*flat_0/node.game.board.size()) + (0.1*big_stack_0/(node.game.max_flats*node.game.n)) + (0.2*road_0) - (0.15*road_1*road_1);
+    //final : (0.1*(center_0)/(node.game.n*node.game.board.size())) + (0.1*flat_0/node.game.board.size()) + (0.1*big_stack_0/(node.game.max_flats*node.game.n)) + (0.2*road_0);
+    //return (0.4*road_1) - (0.3*road_0*road_0) + (0.2*(flat_1 - flat_0)/node.game.board.size()) + (0.1*(big_stack_1 - big_stack_0)/node.game.max_flats) + (0.3*(count_1 - count_0)/node.game.board.size()) + (0.15*(center_1 - center_0));
   }
 }
 
@@ -546,7 +553,7 @@ float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPl
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
-      float child_ab = alphabeta(child, alpha, beta, depth-1, false, temp_str);
+      float child_ab = alphabeta(child, alpha, beta, depth-1, true, temp_str);
       if(v > child_ab) {
         v = child_ab;
         res = all_moves[i];
@@ -561,7 +568,7 @@ float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPl
 
 string alphabetaUtil(MyPlayer node) {
   vector<string> all_moves = node.game.generate_all_moves(node.player);
-	int depth = 2, alpha = -INT_MAX, beta = INT_MAX;
+	int depth = 1, alpha = -INT_MAX, beta = INT_MAX;
 	bool maximizingPlayer = true;
 	string val = "";
 	alphabeta(node, alpha, beta, depth, maximizingPlayer, val);
@@ -584,51 +591,6 @@ void MyPlayer::play(){
         this->game.execute_move(move);
     }
 }
-/*
-void check_road_win(self, player){
-        '''Checks for a road win for player
-        '''
-
-        check_road_win(player, direction)
-
-            visited = set()
-            dfs_stack = []
-            final_positions = set()
-            if (direction == 'ver'){
-                for i in xrange(self.n){
-                    if len(self.board[i]) > 0 and self.board[i][-1][0] == player and self.board[i][-1][1] != 'S':
-                        visited.add(i)
-                        dfs_stack.append(i)
-                    final_positions.add(self.total_squares - 1 - i)
-                }
-            }
-            else if (direction == 'hor'){
-                for i in xrange(self.n){
-                    if (len(self.board[i*self.n]) > 0) and (self.board[i*self.n][-1][0] == player) and (self.board[i*self.n][-1][1] != 'S'){
-                        visited.add(i*self.n)
-                        dfs_stack.append(i*self.n)
-                    }
-                    final_positions.add((i + 1) * self.n - 1)
-                }
-            }
-            while len(dfs_stack) > 0{
-                square = dfs_stack.pop();
-                if square in final_positions{
-                    return True
-                }
-                nbrs = self.get_neighbours(square)
-                for nbr in nbrs{
-                    if (nbr not in visited) and (len(self.board[nbr]) > 0) and (self.board[nbr][-1][0] == player) and (self.board[nbr][-1][1] != 'S'){
-                        dfs_stack.append(nbr)
-                        visited.add(nbr)
-                    }
-                }
-            return False
-
-        return check_road_win(player, 'hor') or check_road_win(player, 'ver')
-
-    }*/
-
 /*
     Flat count
     Standing stones, especially earlier in the game, especially if they can get on top of some stacks.
