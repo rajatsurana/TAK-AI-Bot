@@ -603,7 +603,7 @@ vector<string> sort_by_eval(MyPlayer node, vector<string> all_moves, bool maximi
   return all_moves;
 }
 
-float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlayer, string &res) {
+float alphabeta(MyPlayer node, float alpha, float beta, int depth, bool maximizingPlayer, string &res) {
   float v;
   string temp_str;
   MyPlayer child = node;
@@ -678,15 +678,16 @@ int checkRoadLen(MyPlayer node,string &change){
     //child.game.board;
 }
 
-string alphabetaUtil(MyPlayer node) {
+string alphabetaUtil(MyPlayer node,int depth) {
   vector<string> all_moves = node.game.generate_all_moves(node.player);
-	int depth = 3, alpha = -INT_MAX, beta = INT_MAX;
+
+    float alpha = (float)-INT_MAX, beta =(float) INT_MAX;
   bool maximizingPlayer = true;
 
 	string val = "";
-	string change="";
-  int opponentLength=checkRoadLen(node,change);//opponent
-  int mylength=longRoad(node.game.board, node.player);
+	//string change="";
+  //int opponentLength=checkRoadLen(node,change);//opponent
+  //int mylength=longRoad(node.game.board, node.player);
   /*if( mylength<opponentLength && opponentLength>=3)
   {
       string cg=change.substr(1);
@@ -707,14 +708,24 @@ void MyPlayer::play(){
         cin>>move ;
         this->game.execute_move(move);
     }
+    int counter=0;
+    int depth=2;
     while(1){
+        if(counter<100){
+            depth=2;
+        }else if(counter < 300 && counter>=100){
+            depth=3;
+        }else {
+            depth=4;
+        }
         vector<string> all_moves = this->game.generate_all_moves(this->player);
-        string move = alphabetaUtil(*this);
+        string move = alphabetaUtil(*this,depth);
         this->game.execute_move(move);
         move = move + '\n';
         cout<<move<<std::flush;
         cin>>move;
         this->game.execute_move(move);
+        counter++;
     }
 }
 /*
