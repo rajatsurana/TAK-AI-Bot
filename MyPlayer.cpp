@@ -106,7 +106,7 @@ void Game::execute_move_opponent(string move_string,int player){
     int current_piece = player;
     int square, count, next_square, next_count;
     //count=0;
-    
+
     if (isalpha(move_string[0])){
         square = this->square_to_num(move_string.substr(1));
         pair<int, string> tmp_pair (current_piece, string(1,move_string[0]));
@@ -534,13 +534,11 @@ float evaluation(MyPlayer node) {
         count_0++;
         big_stack_0 += (node.game.board[i].size());
         center_0 += min((row - 0), (node.game.n - 1 - row)) + min((col - 0), (node.game.n - 1 - col));
-        //center_0 += min((i - 0), (node.game.board.size() - i));
       }
       else {
         count_1++;
         big_stack_1 += (node.game.board[i].size());
         center_1 += min((row - 0), (node.game.n - 1 - row)) + min((col - 0), (node.game.n - 1 - col));
-        //center_1 += min((i - 0), (node.game.board.size() - i));
       }
     }
   }
@@ -550,21 +548,16 @@ float evaluation(MyPlayer node) {
 
   // Normallize all functions first ;
   // Current function account for - # stack controlled , bigger stack controlled , flat stones and center pieces ;
-  if(node.player == 1) {
+  if(node.game.turn == 1) {
     road_0 = max(road_0 - 2, 0);
+    //return 0.1*(center_1);
     return (0.1*(center_1)/(node.game.n*node.game.board.size())) + (0.1*flat_1/node.game.board.size()) + (0.1*big_stack_1/(node.game.max_flats*node.game.n)) + (0.2*road_1) - (0.15*road_0*road_0);
-    
-    //child.game.execute_move(all_moves[i]);
-    //child.game.board;
-    //if road1>road0
-    //return 
-    //final : (0.1*(center_1)/(node.game.n*node.game.board.size())) + (0.1*flat_1/node.game.board.size()) + (0.1*big_stack_1/(node.game.max_flats*node.game.n)) + (0.2*road_1);
     //return (0.4*road_0) - (0.3*road_1*road_1) + (0.2*(flat_0 - flat_1)/node.game.board.size()) + (0.1*(big_stack_0 - big_stack_1)/node.game.max_flats) + (0.3*(count_0 - count_1)/node.game.board.size()) + (0.15*(center_0 - center_1));
   }
   else {
     road_1 = max(road_1 - 2, 0);
+    //return 0.1*(center_0);
     return (0.1*(center_0)/(node.game.n*node.game.board.size())) + (0.1*flat_0/node.game.board.size()) + (0.1*big_stack_0/(node.game.max_flats*node.game.n)) + (0.2*road_0) - (0.15*road_1*road_1);
-    //final : (0.1*(center_0)/(node.game.n*node.game.board.size())) + (0.1*flat_0/node.game.board.size()) + (0.1*big_stack_0/(node.game.max_flats*node.game.n)) + (0.2*road_0);
     //return (0.4*road_1) - (0.3*road_0*road_0) + (0.2*(flat_1 - flat_0)/node.game.board.size()) + (0.1*(big_stack_1 - big_stack_0)/node.game.max_flats) + (0.3*(count_1 - count_0)/node.game.board.size()) + (0.15*(center_1 - center_0));
   }
 }
@@ -611,17 +604,17 @@ vector<string> sort_by_eval(MyPlayer node, vector<string> all_moves, bool maximi
 }
 
 float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPlayer, string &res) {
-  int v;
+  float v;
   string temp_str;
   MyPlayer child = node;
   vector<string> all_moves = node.game.generate_all_moves(node.player);
-  all_moves = sort_by_eval(node, all_moves, maximizingPlayer);
+  //all_moves = sort_by_eval(node, all_moves, maximizingPlayer);  // Yes, sorting was a bad idea ;
 
   if(depth==0 || all_moves.size()==0)
     return evaluation(node);
 
   if(maximizingPlayer) {
-    v = -INT_MAX;
+    v = (float)-INT_MAX;
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
@@ -630,16 +623,18 @@ float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPl
       if(v < child_ab) {
         v = child_ab;
         res = all_moves[i];
+        //cerr<<res<<" "<<depth<<" "<<child_ab<<endl;
       }
       alpha = max(alpha, v);
       if(beta <= alpha)
         break;
     }
+    //cerr<<endl;
     return v;
   }
 
   else {
-    v = INT_MAX;
+    v = (float)INT_MAX;
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
@@ -648,18 +643,22 @@ float alphabeta(MyPlayer node, int alpha, int beta, int depth, bool maximizingPl
       if(v > child_ab) {
         v = child_ab;
         res = all_moves[i];
+        //cerr<<res<<" "<<depth<<" "<<child_ab<<endl;
       }
       beta = min(beta, v);
       if(beta <= alpha)
         break;
     }
+    //cerr<<endl;
     return v;
   }
 }
+
 int genMove(MyPlayer child,string move){
       child.game.execute_move_opponent(move,1-child.player);
       return longRoad(child.game.board, 1-child.player);
 }
+
 int checkRoadLen(MyPlayer node,string &change){
   MyPlayer child=node;
   vector<string> all_moves = child.game.generate_all_moves_opponent(1-node.player);
@@ -667,38 +666,37 @@ int checkRoadLen(MyPlayer node,string &change){
   for(int i=0;i<all_moves.size();i++){
       //MyPlayer childNew=node;
       int len = genMove(child,all_moves[i]);
-      
+
       childRoadLength=len;
       if(len>=3){
         change=all_moves[i];
         break;
       }
-      
+
   }
     return childRoadLength;
     //child.game.board;
 }
+
 string alphabetaUtil(MyPlayer node) {
   vector<string> all_moves = node.game.generate_all_moves(node.player);
-	int depth = 2, alpha = -INT_MAX, beta = INT_MAX;
-	bool maximizingPlayer = false;
+	int depth = 3, alpha = -INT_MAX, beta = INT_MAX;
+  bool maximizingPlayer = true;
+
 	string val = "";
-	//alphabeta(node, alpha, beta, depth, maximizingPlayer, val);
-  string change="";
+	string change="";
   int opponentLength=checkRoadLen(node,change);//opponent
   int mylength=longRoad(node.game.board, node.player);
-  if( mylength<opponentLength && opponentLength>=3)
+  /*if( mylength<opponentLength && opponentLength>=3)
   {
       string cg=change.substr(1);
      // cerr<<cg<<endl;
       if(node.game.board[node.game.square_to_num(cg)].size()==0){
           return change;
-      }    
-  }
+      }
+  }*/
 
   alphabeta(node, alpha, beta, depth, maximizingPlayer, val);
-  
-  
 
 	return val;
 }

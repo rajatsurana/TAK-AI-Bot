@@ -1,3 +1,10 @@
 - Handle Horizon effect ; explore little further if looks good ;
-- Improve evaluation function :- train or look up from taktician's ;
-- Generalize for board of size N ;
+- Improve evaluation function :- train or look up from taktician's ; dealing with opponent's road
+- Fix the first move for opponent ;
+- Transposition table ; memoize moves
+- Initial moves database ;
+- Additional refinements slides ;
+- Remove purely bad moves early-on ;
+- Reuse explored subtree of grand-child ;
+- Improve board implementation ; reduce memory usage ;
+- Update changes in Akshay's code ;
