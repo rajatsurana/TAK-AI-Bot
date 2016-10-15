@@ -614,7 +614,7 @@ float alphabeta(MyPlayer node, float alpha, float beta, int depth, bool maximizi
     return evaluation(node);
 
   if(maximizingPlayer) {
-    v = (float)-INT_MAX;
+    v = (float)alpha;
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
@@ -626,15 +626,17 @@ float alphabeta(MyPlayer node, float alpha, float beta, int depth, bool maximizi
         //cerr<<res<<" "<<depth<<" "<<child_ab<<endl;
       }
       alpha = max(alpha, v);
-      if(beta <= alpha)
-        break;
+      if(beta <= alpha){
+          //cerr<<"pruned alpha"<<endl;
+          break;
+        }
     }
     //cerr<<endl;
     return v;
   }
 
   else {
-    v = (float)INT_MAX;
+    v = (float)beta;
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
@@ -646,8 +648,10 @@ float alphabeta(MyPlayer node, float alpha, float beta, int depth, bool maximizi
         //cerr<<res<<" "<<depth<<" "<<child_ab<<endl;
       }
       beta = min(beta, v);
-      if(beta <= alpha)
-        break;
+      if(beta <= alpha){
+          //cerr<<"pruned beta"<<endl;
+          break;
+        }
     }
     //cerr<<endl;
     return v;
@@ -711,12 +715,14 @@ void MyPlayer::play(){
     int counter=0;
     int depth=2;
     while(1){
-        if(counter<100){
+        if(counter<10){
             depth=2;
-        }else if(counter < 300 && counter>=100){
-            depth=3;
+        }else if(counter <20 && counter>=10){
+            depth=2;
+        }else if(counter < 300 && counter>=20){
+            depth=2;
         }else {
-            depth=4;
+            depth=2;
         }
         vector<string> all_moves = this->game.generate_all_moves(this->player);
         string move = alphabetaUtil(*this,depth);
