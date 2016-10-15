@@ -614,7 +614,7 @@ float alphabeta(MyPlayer node, float alpha, float beta, int depth, bool maximizi
     return evaluation(node);
 
   if(maximizingPlayer) {
-    v = (float)alpha;
+    v = (float)-INT_MAX;
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
@@ -636,7 +636,7 @@ float alphabeta(MyPlayer node, float alpha, float beta, int depth, bool maximizi
   }
 
   else {
-    v = (float)beta;
+    v = (float)INT_MAX;
     for(int i = 0 ; i < all_moves.size() ; i++) {
       child = node;
       child.game.execute_move(all_moves[i]);
