@@ -563,13 +563,13 @@ float evaluation(MyPlayer node) {
   int board_len = node.game.n;
   int maxflats = node.game.max_flats;
 
-  int road_block = node.game.n - 3;		// starts blocking for : 5 -> 3 , 6 -> 4 , 7 -> 5 ;
+  int road_block = node.game.n - 4;		// starts blocking for : 5 -> 3 , 6 -> 4 , 7 -> 5 ;
   if(node.game.turn == 1) {
 	road_0 = max(road_0 - road_block, 0);
 	return (0.1*road_1) - (0.105*road_0*road_0) + ((0.05/board_size)*(2*flat_1 - flat_0)) + ((0.025/(board_size*board_len) )*(2*center_1 - center_0)) + ((0.015/(maxflats*board_len) )*(2*big_stack_1 - big_stack_0));    
   }
   else {
-	road_1 = max(road_1 - road_block, 0);
+    road_1 = max(road_1 - road_block, 0);
     return (0.1*road_0) - (0.105*road_1*road_1)  + ((0.05/board_size)*(2*flat_0 - flat_1)) + ((0.025/(board_size*board_len) )*(2*center_0 - center_1)) + ((0.015/(maxflats*board_len) )*(2*big_stack_0 - big_stack_1));
   }
 }
