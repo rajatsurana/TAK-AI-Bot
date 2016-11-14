@@ -504,8 +504,19 @@ int longRoad(vector<vector<pair<int, string> > > board, int player) {
   return road_len;
 }
 
-float evaluation(MyPlayer node) {
+/*
+	Evaluation Ideas :-
 
+    Standing stones, especially earlier in the game, especially if they can get on top of some stacks.
+    Your colour of pieces in stacks, even in stacks controlled by opponents.
+    Being closer than opponent to finishing a road, more so the closer the road is to being finished. Remember, if the count is even, the advantage goes to whoever has the turn.
+    Having the option of spreading with a lot of flat gain.
+    Having the option of spreading on top of large stacks.
+    Some sneaky way of not counting spread options much if the opponent is able to spread on top of a stack before the spread is utilised.
+
+    High eval if : road win , flat win , board completely filled ;
+*/
+float evaluation(MyPlayer node) {
   int count_0 = 0, count_1 = 0, stand_0 = 0, stand_1 = 0;   // counts tiles/stacks with top/control ; counts number of standing walls ;
   int big_stack_0 = 0, big_stack_1 = 0;   // controlling big stacks ;
   int center_0 = 0, center_1 = 0;         // distance from center ;
@@ -548,17 +559,18 @@ float evaluation(MyPlayer node) {
 
   // Normallize all functions first ;
   // Current function account for - # stack controlled , bigger stack controlled , flat stones and center pieces ;
+  int board_size = node.game.board.size();
+  int board_len = node.game.n;
+  int maxflats = node.game.max_flats;
+
+  int road_block = node.game.n - 3;		// starts blocking for : 5 -> 3 , 6 -> 4 , 7 -> 5 ;
   if(node.game.turn == 1) {
-    road_0 = max(road_0 - 2, 0);
-    //return 0.1*(center_1);
-    return (0.1*(center_1)/(node.game.n*node.game.board.size())) + (0.1*flat_1/node.game.board.size()) + (0.1*big_stack_1/(node.game.max_flats*node.game.n)) + (0.2*road_1) - (0.15*road_0*road_0);
-    //return (0.4*road_0) - (0.3*road_1*road_1) + (0.2*(flat_0 - flat_1)/node.game.board.size()) + (0.1*(big_stack_0 - big_stack_1)/node.game.max_flats) + (0.3*(count_0 - count_1)/node.game.board.size()) + (0.15*(center_0 - center_1));
+	road_0 = max(road_0 - road_block, 0);
+	return (0.1*road_1) - (0.105*road_0*road_0) + ((0.05/board_size)*(2*flat_1 - flat_0)) + ((0.025/(board_size*board_len) )*(2*center_1 - center_0)) + ((0.015/(maxflats*board_len) )*(2*big_stack_1 - big_stack_0));    
   }
   else {
-    road_1 = max(road_1 - 2, 0);
-    //return 0.1*(center_0);
-    return (0.1*(center_0)/(node.game.n*node.game.board.size())) + (0.1*flat_0/node.game.board.size()) + (0.1*big_stack_0/(node.game.max_flats*node.game.n)) + (0.2*road_0) - (0.15*road_1*road_1);
-    //return (0.4*road_1) - (0.3*road_0*road_0) + (0.2*(flat_1 - flat_0)/node.game.board.size()) + (0.1*(big_stack_1 - big_stack_0)/node.game.max_flats) + (0.3*(count_1 - count_0)/node.game.board.size()) + (0.15*(center_1 - center_0));
+	road_1 = max(road_1 - road_block, 0);
+    return (0.1*road_0) - (0.105*road_1*road_1)  + ((0.05/board_size)*(2*flat_0 - flat_1)) + ((0.025/(board_size*board_len) )*(2*center_0 - center_1)) + ((0.015/(maxflats*board_len) )*(2*big_stack_0 - big_stack_1));
   }
 }
 
@@ -683,25 +695,12 @@ int checkRoadLen(MyPlayer node,string &change){
 }
 
 string alphabetaUtil(MyPlayer node,int depth) {
-  vector<string> all_moves = node.game.generate_all_moves(node.player);
-
-    float alpha = (float)-INT_MAX, beta =(float) INT_MAX;
-  bool maximizingPlayer = true;
-
+	vector<string> all_moves = node.game.generate_all_moves(node.player);
+	float alpha = (float)-INT_MAX, beta =(float) INT_MAX;
+	bool maximizingPlayer = true;
 	string val = "";
-	//string change="";
-  //int opponentLength=checkRoadLen(node,change);//opponent
-  //int mylength=longRoad(node.game.board, node.player);
-  /*if( mylength<opponentLength && opponentLength>=3)
-  {
-      string cg=change.substr(1);
-     // cerr<<cg<<endl;
-      if(node.game.board[node.game.square_to_num(cg)].size()==0){
-          return change;
-      }
-  }*/
 
-  alphabeta(node, alpha, beta, depth, maximizingPlayer, val);
+	alphabeta(node, alpha, beta, depth, maximizingPlayer, val);
 
 	return val;
 }
@@ -734,20 +733,7 @@ void MyPlayer::play(){
         counter++;
     }
 }
-/*
-    Flat count
-    Standing stones, especially earlier in the game, especially if they can get on top of some stacks.
-    Your colour of pieces in stacks, even in stacks controlled by opponents.
-    Controlling big stacks.
-    Having control in the centre of the board.
-    Being close to finishing a road.
-    Being closer than opponent to finishing a road, more so the closer the road is to being finished. Remember, if the count is even, the advantage goes to whoever has the turn.
-    Having the option of spreading with a lot of flat gain.
-    Having the option of spreading on top of large stacks.
-    Some sneaky way of not counting spread options much if the opponent is able to spread on top of a stack before the spread is utilised.
 
-    High eval if : road win , flat win , board completely filled ;
-*/
 int main(){
     MyPlayer mp;
     return 0;
