@@ -581,10 +581,10 @@ float evaluation(MyPlayer node) {
 
   // starts blocking for : 5 -> 3 , 6 -> 4 , 7 -> 6 ;
   int road_block;
-  if(board_len==7)
+  //if(board_len==7)
 	road_block = node.game.n - 3;
-  else
-	road_block = node.game.n - 4;
+  //else
+	//road_block = node.game.n - 4;
   if(node.game.turn == 1) {
 	if(road_1==board_len)
 		return 100000;
