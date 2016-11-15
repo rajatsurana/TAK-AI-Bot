@@ -33,6 +33,7 @@ class Game{
         string square_to_string(int i);
         int square_to_num(string square_string);
         void execute_move(string move_string);
+		void unexecute_move(string move_string);
         void execute_move_opponent(string move_string,int player);
         bool check_valid(int square, char direction, vector<int> partition );
         vector<string> generate_stack_moves(int square);
@@ -165,6 +166,21 @@ void Game::execute_move_opponent(string move_string,int player){
   }
     this->turn = 1 - this->turn;
 }
+
+void Game::unexecute_move(string move_string){
+	int current_piece;
+	if(this->moves==1 || this->moves==0)
+		current_piece = 1 - this->turn;
+	else
+		current_piece = this->turn;
+	int square = this->square_to_num(move_string.substr(1));
+	this->board[square].pop_back();
+	if(move_string[0]=='C')
+		this->players[current_piece].capstones += 1;
+	else
+		this->players[current_piece].flats += 1;
+}
+
 void Game::execute_move(string move_string){
     ///Execute move
     int current_piece = 0;
@@ -563,12 +579,25 @@ float evaluation(MyPlayer node) {
   int board_len = node.game.n;
   int maxflats = node.game.max_flats;
 
-  int road_block = node.game.n - 4;		// starts blocking for : 5 -> 3 , 6 -> 4 , 7 -> 5 ;
+  // starts blocking for : 5 -> 3 , 6 -> 4 , 7 -> 6 ;
+  int road_block;
+  if(board_len==7)
+	road_block = node.game.n - 3;
+  else
+	road_block = node.game.n - 4;
   if(node.game.turn == 1) {
+	if(road_1==board_len)
+		return 100000;
+	if(road_0==board_len)
+		return -100000;
 	road_0 = max(road_0 - road_block, 0);
 	return (0.1*road_1) - (0.105*road_0*road_0) + ((0.05/board_size)*(2*flat_1 - flat_0)) + ((0.025/(board_size*board_len) )*(2*center_1 - center_0)) + ((0.015/(maxflats*board_len) )*(2*big_stack_1 - big_stack_0));    
   }
   else {
+	if(road_0==board_len)
+		return 100000;
+	if(road_1==board_len)
+		return -100000;
     road_1 = max(road_1 - road_block, 0);
     return (0.1*road_0) - (0.105*road_1*road_1)  + ((0.05/board_size)*(2*flat_0 - flat_1)) + ((0.025/(board_size*board_len) )*(2*center_0 - center_1)) + ((0.015/(maxflats*board_len) )*(2*big_stack_0 - big_stack_1));
   }
